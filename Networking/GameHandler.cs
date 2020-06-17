@@ -2,9 +2,8 @@
 using System.Collections.Generic;
 using GameServer.Utils;
 using GameServer.GameLogic;
-using System.Diagnostics;
 
-namespace GameServer
+namespace GameServer.Networking
 {
     public class Game
     {

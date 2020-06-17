@@ -4,7 +4,7 @@ using System.Text;
 using GameServer.GameLogic;
 using GameServer.Utils;
 
-namespace GameServer
+namespace GameServer.Networking
 {
     /// <summary>Sent from server to client.</summary>
     public enum ServerPackets

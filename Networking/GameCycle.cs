@@ -1,4 +1,4 @@
-﻿namespace GameServer
+﻿namespace GameServer.Networking
 {
     class GameCycle
     {

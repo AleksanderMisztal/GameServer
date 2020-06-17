@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Net;
-using System.Net.Sockets;
 using System.Net.WebSockets;
 using System.Threading.Tasks;
 
-namespace GameServer
+namespace GameServer.Networking
 {
     class Server
     {
@@ -23,6 +21,7 @@ namespace GameServer
         public static void Stop()
         {
             throw new NotImplementedException();
+            //for client in clients client.disconnect()
         }
 
         public static void InitializePacketHandlers()

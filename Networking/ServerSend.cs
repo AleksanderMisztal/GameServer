@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using GameServer.GameLogic;
 using GameServer.Utils;
 
-namespace GameServer
+namespace GameServer.Networking
 {
     class ServerSend
     {

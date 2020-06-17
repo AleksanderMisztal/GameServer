@@ -1,7 +1,7 @@
 ﻿using System;
 using GameServer.Utils;
 
-namespace GameServer
+namespace GameServer.Networking
 {
     class ServerHandle
     {
