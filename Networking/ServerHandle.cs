@@ -1,11 +1,12 @@
 ﻿using System;
+using System.Threading.Tasks;
 using GameServer.Utils;
 
 namespace GameServer.Networking
 {
     class ServerHandle
     {
-        public static void JoinLobby(int fromClient, Packet packet)
+        public static async Task JoinLobby(int fromClient, Packet packet)
         {
             int clientIdCheck = packet.ReadInt();
             string username = packet.ReadString();
@@ -15,19 +16,20 @@ namespace GameServer.Networking
             GameHandler.AddToLobby(fromClient, username);
         }
 
-        public static void JoinGame(int fromClient, Packet packet)
+        public static async Task JoinGame(int fromClient, Packet packet)
         {
             int oponentId = packet.ReadInt();
 
-            GameHandler.SendToGame(fromClient);
+            await GameHandler.SendToGame(fromClient);
         }
 
-        public static void MoveTroop(int fromClient, Packet packet)
+        public static async Task MoveTroop(int fromClient, Packet packet)
         {
+            Console.WriteLine($"Player {fromClient} wants to move a troop.");
             Vector2Int position = packet.ReadVector2Int();
             int direction = packet.ReadInt();
 
-            GameHandler.MoveTroop(fromClient, position, direction);
+            await GameHandler.MoveTroop(fromClient, position, direction);
         }
     }
 }

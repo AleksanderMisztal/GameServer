@@ -64,12 +64,12 @@ namespace GameServer.Networking
             {
                 byte[] data = await Receive();
 
-                ThreadManager.ExecuteOnMainThread(() =>
+                ThreadManager.ExecuteOnMainThread(async () =>
                 {
                     using (Packet packet = new Packet(data))
                     {
                         int packetType = packet.ReadInt();
-                        Server.packetHandlers[packetType](id, packet);
+                        await Server.packetHandlers[packetType](id, packet);
                     }
                 });
 

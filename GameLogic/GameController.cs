@@ -1,6 +1,8 @@
 ﻿using System.Linq;
 using System.Collections.Generic;
 using GameServer.Utils;
+using GameServer.Networking;
+using System.Threading.Tasks;
 
 namespace GameServer.GameLogic
 {
@@ -34,12 +36,12 @@ namespace GameServer.GameLogic
             waves = Wave.BasicPlanes(out maxBlueWave, out maxRedWave);
         }
 
-        public void Initialize()
+        public async Task Initialize()
         {
-            ToggleActivePlayer();
+            await ToggleActivePlayer();
         }
 
-        public void MoveTroop(PlayerId player, Vector2Int position, int direction)
+        public async Task MoveTroop(PlayerId player, Vector2Int position, int direction)
         {
             if (!IsValidMove(player, position, direction, out string message))
             {
@@ -55,10 +57,10 @@ namespace GameServer.GameLogic
             if (!troopAtPosition.TryGetValue(troop.Position, out Troop encounter))
             {
                 AdjustTroopPosition(troop);
-                GameHandler.TroopMoved(gameId, position, direction, battleResults);
+                await GameHandler.TroopMoved(gameId, position, direction, battleResults);
                 if (movePointsLeft <= 0)
                 {
-                    ToggleActivePlayer();
+                    await ToggleActivePlayer();
                 }
                 return;
             }
@@ -85,15 +87,15 @@ namespace GameServer.GameLogic
                 AdjustTroopPosition(troop);
             }
 
-            GameHandler.TroopMoved(gameId, position, direction, battleResults);
+            await GameHandler.TroopMoved(gameId, position, direction, battleResults);
 
             if (gameEnded)
             {
-                GameHandler.GameEnded(gameId, redScore, blueScore);
+                await GameHandler.GameEnded(gameId, redScore, blueScore);
             }
             else if (movePointsLeft <= 0)
             {
-                ToggleActivePlayer();
+                await ToggleActivePlayer();
             }
         }
 
@@ -203,10 +205,10 @@ namespace GameServer.GameLogic
             return GetEmptyCell(neighbours[0]);
         }
 
-        private void ToggleActivePlayer()
+        private async Task ToggleActivePlayer()
         {
             roundNumber++;
-            SpawnNextWave();
+            await SpawnNextWave();
 
             HashSet<Troop> beginningTroops = activePlayer == PlayerId.Blue ? redTroops : blueTroops;
             HashSet<Troop> endingTroops = activePlayer == PlayerId.Blue ? blueTroops : redTroops;
@@ -225,23 +227,23 @@ namespace GameServer.GameLogic
 
             if (movePointsLeft == 0)
             {
-                ToggleActivePlayer();
+                await ToggleActivePlayer();
             }
         }
 
-        private void SpawnNextWave()
+        private async Task SpawnNextWave()
         {
             if (waves.TryGetValue(roundNumber, out Wave wave))
             {
-                SpawnWave(wave);
+                await SpawnWave(wave);
             }
             else
             {
-                GameHandler.TroopsSpawned(gameId, new List<TroopTemplate>(), new List<Vector2Int>());
+                await GameHandler.TroopsSpawned(gameId, new List<TroopTemplate>(), new List<Vector2Int>());
             }
         }
 
-        private void SpawnWave(Wave wave)
+        private async Task SpawnWave(Wave wave)
         {
             List<TroopTemplate> templates = new List<TroopTemplate>();
             List<Vector2Int> positions = new List<Vector2Int>();
@@ -265,7 +267,7 @@ namespace GameServer.GameLogic
                     redTroops.Add(troop);
                 }
             }
-            GameHandler.TroopsSpawned(gameId, templates, positions);
+            await GameHandler.TroopsSpawned(gameId, templates, positions);
         }
 
         private void SetInitialMovePointsLeft(PlayerId player)

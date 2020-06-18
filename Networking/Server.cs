@@ -10,7 +10,7 @@ namespace GameServer.Networking
         private static int nextClientId = 0;
         public static Dictionary<int, Client> clients = new Dictionary<int, Client>();
 
-        public delegate void PacketHandler(int _fromClient, Packet _packet);
+        public delegate Task PacketHandler(int _fromClient, Packet _packet);
         public static Dictionary<int, PacketHandler> packetHandlers;
 
         public static void Start()

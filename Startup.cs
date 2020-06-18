@@ -1,13 +1,11 @@
 using System;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System.Net.WebSockets;
-using System.Threading;
-using GameServer;
+using GameServer.Networking;
 
 namespace WebSocketServerAppTest
 {
@@ -15,10 +13,16 @@ namespace WebSocketServerAppTest
     {
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddCors();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            app.UseCors(builder => builder
+            .AllowAnyOrigin()
+            .AllowAnyMethod()
+            .AllowAnyHeader());
+
             app.UseWebSockets();
 
             app.Use(async (context, next) =>
@@ -43,7 +47,5 @@ namespace WebSocketServerAppTest
                 await context.Response.WriteAsync("Hello world");
             });
         }
-
-        
     }
 }

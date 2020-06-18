@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using GameServer.Utils;
 using GameServer.GameLogic;
+using System.Threading.Tasks;
 
 namespace GameServer.Networking
 {
@@ -32,7 +33,7 @@ namespace GameServer.Networking
         private static int waitingClient;
 
         // Game -> Server
-        public static void SendToGame(int client)
+        public static async Task SendToGame(int client)
         {
             if (!someoneWaiting)
             {
@@ -52,15 +53,15 @@ namespace GameServer.Networking
             clientToColor[client] = PlayerId.Blue;
             clientToColor[waitingClient] = PlayerId.Red;
 
-            game.Controller.Initialize();
+            await game.Controller.Initialize();
 
-            ServerSend.GameJoined(client, clientToUsername[waitingClient], PlayerId.Blue);
-            ServerSend.GameJoined(waitingClient, clientToUsername[client], PlayerId.Red);
+            await ServerSend.GameJoined(client, clientToUsername[waitingClient], PlayerId.Blue);
+            await ServerSend.GameJoined(waitingClient, clientToUsername[client], PlayerId.Red);
 
             nextGameId++;
         }
 
-        public static void MoveTroop(int client, Vector2Int position, int direction)
+        public static async Task MoveTroop(int client, Vector2Int position, int direction)
         {
             if (!clientToGame.TryGetValue(client, out Game game))
             {
@@ -70,7 +71,7 @@ namespace GameServer.Networking
             PlayerId color = clientToColor[client];
             try
             {
-                game.Controller.MoveTroop(color, position, direction);
+                await game.Controller.MoveTroop(color, position, direction);
             }
             catch (IllegalMoveException ex)
             {
@@ -85,31 +86,31 @@ namespace GameServer.Networking
 
 
         // Server -> Game
-        public static void TroopsSpawned(int gameId, List<TroopTemplate> templates, List<Vector2Int> positions)
+        public static async Task TroopsSpawned(int gameId, List<TroopTemplate> templates, List<Vector2Int> positions)
         {
             if (!games.TryGetValue(gameId, out Game game))
             {
                 return;
             }
 
-            ServerSend.TroopsSpawned(game.ClientBlue, templates, positions);
-            ServerSend.TroopsSpawned(game.ClientRed, templates, positions);
+            await ServerSend.TroopsSpawned(game.ClientBlue, templates, positions);
+            await ServerSend.TroopsSpawned(game.ClientRed, templates, positions);
         }
 
-        public static void TroopMoved(int gameId, Vector2Int position, int direction, List<BattleResult> battleResults)
+        public static async Task TroopMoved(int gameId, Vector2Int position, int direction, List<BattleResult> battleResults)
         {
             Game game = games[gameId];
 
-            ServerSend.TroopMoved(game.ClientBlue, position, direction, battleResults);
-            ServerSend.TroopMoved(game.ClientRed, position, direction, battleResults);
+            await ServerSend.TroopMoved(game.ClientBlue, position, direction, battleResults);
+            await ServerSend.TroopMoved(game.ClientRed, position, direction, battleResults);
         }
 
-        public static void GameEnded(int gameId, int redScore, int blueScore)
+        public static async Task GameEnded(int gameId, int redScore, int blueScore)
         {
             Game game = games[gameId];
 
-            ServerSend.GameEnded(game.ClientBlue, redScore, blueScore);
-            ServerSend.GameEnded(game.ClientRed, redScore, blueScore);
+            await ServerSend.GameEnded(game.ClientBlue, redScore, blueScore);
+            await ServerSend.GameEnded(game.ClientRed, redScore, blueScore);
         }
     }
 }
