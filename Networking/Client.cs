@@ -1,8 +1,10 @@
 ﻿using System;
 using System.IO;
 using System.Net.WebSockets;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using WebSocketServerAppTest.Utils;
 
 namespace GameServer.Networking
 {
@@ -53,9 +55,21 @@ namespace GameServer.Networking
 
                 memoryStream.Seek(0, SeekOrigin.Begin);
 
-                if (result.MessageType == WebSocketMessageType.Binary)
+                if (result.MessageType == WebSocketMessageType.Text)
                 {
-                    return memoryStream.ToArray();
+                    using (var reader = new StreamReader(memoryStream, Encoding.UTF8))
+                    {
+                        string bytes = reader.ReadToEnd();
+                        Console.WriteLine("Message is: " + bytes);
+                        try
+                        {
+                            return Serializer.Deserialize(bytes);
+                        }
+                        catch
+                        {
+                            Console.WriteLine("Couldn't convert to bytes");
+                        }
+                    }
                 }
                 return null;
             }
@@ -63,13 +77,26 @@ namespace GameServer.Networking
             private async Task BeginReceive()
             {
                 byte[] data = await Receive();
+                
+                if (data == null)
+                {
+                    await BeginReceive();
+                    return;
+                }
 
                 ThreadManager.ExecuteOnMainThread(async () =>
                 {
                     using (Packet packet = new Packet(data))
                     {
                         int packetType = packet.ReadInt();
-                        await Server.packetHandlers[packetType](id, packet);
+                        try
+                        {
+                            await Server.packetHandlers[packetType](id, packet);
+                        }
+                        catch
+                        {
+                            Console.WriteLine("Unsupported packet type: " + packetType);
+                        }
                     }
                 });
 
@@ -79,7 +106,7 @@ namespace GameServer.Networking
             public async Task SendData(Packet packet)
             {
                 Console.WriteLine("Sending data...");
-                var buffer = new ArraySegment<byte>(packet.ToArray());
+                var buffer = new ArraySegment<byte>(Encoding.UTF8.GetBytes(Serializer.Serialize(packet.ToArray())));
                 await socket.SendAsync(buffer, WebSocketMessageType.Binary, true, CancellationToken.None);
             }
         }
