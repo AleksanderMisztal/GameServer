@@ -18,6 +18,7 @@ namespace GameServer.Networking
 
         public static async Task JoinGame(int fromClient, Packet packet)
         {
+            Console.WriteLine($"Client with id {fromClient} is being sent to game");
             int oponentId = packet.ReadInt();
 
             await GameHandler.SendToGame(fromClient);

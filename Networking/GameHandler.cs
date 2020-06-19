@@ -19,6 +19,11 @@ namespace GameServer.Networking
             ClientRed = clientRed;
             ClientBlue = clientBlue;
         }
+
+        public override string ToString()
+        {
+            return $"(GameId : {Controller.gameId}, Blue : {ClientBlue}, Red : {ClientRed})";
+        }
     }
 
     public static class GameHandler
@@ -111,6 +116,20 @@ namespace GameServer.Networking
 
             await ServerSend.GameEnded(game.ClientBlue, redScore, blueScore);
             await ServerSend.GameEnded(game.ClientRed, redScore, blueScore);
+        }
+
+
+        // For displaying status
+        public static Dictionary<int, string> Clients => clientToUsername;
+        public static Dictionary<int, Game> Games => games;
+
+        // Internal
+        public static void ClientDisconnected(int clientId)
+        {
+            if (someoneWaiting && clientId == waitingClient)
+            {
+                someoneWaiting = false;
+            }
         }
     }
 }

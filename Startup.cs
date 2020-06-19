@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System.Net.WebSockets;
 using GameServer.Networking;
+using System.Linq;
 
 namespace WebSocketServerAppTest
 {
@@ -27,11 +28,9 @@ namespace WebSocketServerAppTest
 
             app.Use(async (context, next) =>
             {
-                Console.WriteLine("In request pipeline");
                 if (context.WebSockets.IsWebSocketRequest)
                 {
                     WebSocket socket = await context.WebSockets.AcceptWebSocketAsync();
-                    Console.WriteLine("Web socket connection accepted!");
 
                     await Server.ConnectNewClient(socket);
                 }
@@ -43,8 +42,13 @@ namespace WebSocketServerAppTest
 
             app.Run(async context =>
             {
-                Console.WriteLine("Received a non websocket request.");
-                await context.Response.WriteAsync("Hello world");
+                string[] css = GameHandler.Clients.Select(item => $"({item.Key} : {item.Value})").ToArray();
+                string cs = string.Join("\n", css);
+
+                string[] gss = GameHandler.Games.Select(item => $"{item.Key} : {item.Value}").ToArray();
+                string gs = string.Join("\n", gss);
+
+                await context.Response.WriteAsync(cs + "\n" + gs);
             });
         }
     }

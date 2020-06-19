@@ -10,8 +10,6 @@ namespace GameServer.Networking
 {
     class Client
     {
-        public static int dataBufferSize = 4096;
-
         public int id;
         public WsClient wsClient;
 
@@ -33,7 +31,6 @@ namespace GameServer.Networking
 
             public async Task Connect(WebSocket socket)
             {
-                Console.WriteLine("Connecting...");
                 this.socket = socket;
                 await ServerSend.Welcome(id, "Welcome to the server!");
                 await BeginReceive();
@@ -42,7 +39,6 @@ namespace GameServer.Networking
 
             private async Task<byte[]> Receive()
             {
-                Console.WriteLine("Receiving...");
                 ArraySegment<byte> buffer = new ArraySegment<byte>(new byte[4 * 1024]);
                 var memoryStream = new MemoryStream();
                 WebSocketReceiveResult result;
@@ -60,7 +56,6 @@ namespace GameServer.Networking
                     using (var reader = new StreamReader(memoryStream, Encoding.UTF8))
                     {
                         string bytes = reader.ReadToEnd();
-                        Console.WriteLine("Message is: " + bytes);
                         try
                         {
                             return Serializer.Deserialize(bytes);
@@ -76,7 +71,16 @@ namespace GameServer.Networking
 
             private async Task BeginReceive()
             {
-                byte[] data = await Receive();
+                byte[] data = null;
+                try
+                {
+                    data = await Receive();
+                }
+                catch (WebSocketException)
+                {
+                    GameHandler.ClientDisconnected(id);
+                    return;
+                }
                 
                 if (data == null)
                 {
@@ -105,7 +109,6 @@ namespace GameServer.Networking
 
             public async Task SendData(Packet packet)
             {
-                Console.WriteLine("Sending data...");
                 var buffer = new ArraySegment<byte>(Encoding.UTF8.GetBytes(Serializer.Serialize(packet.ToArray())));
                 await socket.SendAsync(buffer, WebSocketMessageType.Binary, true, CancellationToken.None);
             }
