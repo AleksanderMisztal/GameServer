@@ -51,7 +51,7 @@ namespace GameServer.Networking
 
                 memoryStream.Seek(0, SeekOrigin.Begin);
 
-                if (result.MessageType == WebSocketMessageType.Text)
+                if (result.MessageType != WebSocketMessageType.Close)
                 {
                     using (var reader = new StreamReader(memoryStream, Encoding.UTF8))
                     {
@@ -76,8 +76,9 @@ namespace GameServer.Networking
                 {
                     data = await Receive();
                 }
-                catch (WebSocketException)
+                catch (WebSocketException ex)
                 {
+                    Console.WriteLine(ex);
                     GameHandler.ClientDisconnected(id);
                     return;
                 }
