@@ -58,11 +58,11 @@ namespace GameServer.GameLogic
         public static Dictionary<int, Wave> TestPlanes(out int maxBlueWave, out int maxRedWave)
         {
             TroopTemplate blueTroop = new TroopTemplate(PlayerId.Blue, 2, 2, 0);
-            TroopTemplate redTroop = new TroopTemplate(PlayerId.Red, 2, 2, 3);
+            TroopTemplate redTroop = new TroopTemplate(PlayerId.Red, 20, 2, 3);
 
             List<TroopTemplate> blueWaveTroops = new List<TroopTemplate>
             {
-                blueTroop, blueTroop
+                blueTroop, blueTroop, blueTroop, blueTroop
             };
             List<TroopTemplate> redWave1Troops = new List<TroopTemplate>
             {

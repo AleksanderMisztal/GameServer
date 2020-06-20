@@ -49,19 +49,32 @@ namespace GameServer.Networking
 
             someoneWaiting = false;
 
-            Game game = new Game(new GameController(nextGameId), waitingClient, client);
+            int playingRed;
+            int playingBlue;
+
+            if (new Random().Next(2) == 0)
+            {
+                playingRed = waitingClient;
+                playingBlue = client;
+            }
+            else
+            {
+                playingRed = client;
+                playingBlue = waitingClient;
+            }
+            Game game = new Game(new GameController(nextGameId), playingRed, playingBlue);
             games.Add(nextGameId, game);
 
-            clientToGame[client] = game;
-            clientToGame[waitingClient] = game;
+            clientToGame[playingRed] = game;
+            clientToGame[playingBlue] = game;
 
-            clientToColor[client] = PlayerId.Blue;
-            clientToColor[waitingClient] = PlayerId.Red;
+            clientToColor[playingBlue] = PlayerId.Blue;
+            clientToColor[playingRed] = PlayerId.Red;
 
             await game.Controller.Initialize();
 
-            await ServerSend.GameJoined(client, clientToUsername[waitingClient], PlayerId.Blue);
-            await ServerSend.GameJoined(waitingClient, clientToUsername[client], PlayerId.Red);
+            await ServerSend.GameJoined(playingBlue, clientToUsername[waitingClient], PlayerId.Blue);
+            await ServerSend.GameJoined(playingRed, clientToUsername[client], PlayerId.Red);
 
             nextGameId++;
         }
