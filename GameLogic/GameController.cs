@@ -33,7 +33,7 @@ namespace GameServer.GameLogic
         public GameController(int gameId)
         {
             this.gameId = gameId;
-            waves = Wave.TestPlanes(out maxBlueWave, out maxRedWave);
+            waves = Wave.BasicPlanes(out maxBlueWave, out maxRedWave);
         }
 
         public async Task Initialize()

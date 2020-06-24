@@ -18,7 +18,7 @@ namespace GameServer.GameLogic
         public static Dictionary<int, Wave> BasicPlanes(out int maxBlueWave, out int maxRedWave)
         {
             TroopTemplate blueTroop = new TroopTemplate(PlayerId.Blue, 5, 2, 0);
-            TroopTemplate redTroop = new TroopTemplate(PlayerId.Red, 4, 2, 3);
+            TroopTemplate redTroop = new TroopTemplate(PlayerId.Red, 5, 2, 3);
 
             List<TroopTemplate> blueWaveTroops = new List<TroopTemplate>
             {
@@ -68,19 +68,9 @@ namespace GameServer.GameLogic
             {
                 redTroop
             };
-            List<TroopTemplate> redWave2Troops = new List<TroopTemplate>
-            {
-                redTroop, redTroop
-            };
-            List<TroopTemplate> redWave3Troops = new List<TroopTemplate>
-            {
-                redTroop
-            };
 
             Wave blueWave = new Wave(blueWaveTroops, new Vector2Int(10, 5));
             Wave redWave1 = new Wave(redWave1Troops, new Vector2Int(12, 5));
-            Wave redWave2 = new Wave(redWave2Troops, new Vector2Int(12, 5));
-            Wave redWave3 = new Wave(redWave3Troops, new Vector2Int(12, 5));
 
             maxBlueWave = 1;
             maxRedWave = 2;

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Net.WebSockets;
 using System.Text;
@@ -79,7 +80,7 @@ namespace GameServer.Networking
                 catch (WebSocketException ex)
                 {
                     Console.WriteLine(ex);
-                    GameHandler.ClientDisconnected(id);
+                    await GameHandler.ClientDisconnected(id);
                     return;
                 }
                 
@@ -98,7 +99,7 @@ namespace GameServer.Networking
                         {
                             await Server.packetHandlers[packetType](id, packet);
                         }
-                        catch
+                        catch (KeyNotFoundException)
                         {
                             Console.WriteLine("Unsupported packet type: " + packetType);
                         }

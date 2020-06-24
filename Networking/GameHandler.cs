@@ -73,8 +73,8 @@ namespace GameServer.Networking
 
             await game.Controller.Initialize();
 
-            await ServerSend.GameJoined(playingBlue, clientToUsername[waitingClient], PlayerId.Blue);
-            await ServerSend.GameJoined(playingRed, clientToUsername[client], PlayerId.Red);
+            await ServerSend.GameJoined(playingBlue, clientToUsername[playingRed], PlayerId.Blue);
+            await ServerSend.GameJoined(playingRed, clientToUsername[playingBlue], PlayerId.Red);
 
             nextGameId++;
         }
@@ -137,11 +137,16 @@ namespace GameServer.Networking
         public static Dictionary<int, Game> Games => games;
 
         // Internal
-        public static void ClientDisconnected(int clientId)
+        public static async Task ClientDisconnected(int clientId)
         {
             if (someoneWaiting && clientId == waitingClient)
             {
                 someoneWaiting = false;
+            }
+            if (clientToGame.TryGetValue(clientId, out Game game))
+            {
+                int oponent = clientId ^ game.ClientBlue ^ game.ClientRed;
+                await ServerSend.OpponentDisconnected(oponent);
             }
         }
     }
