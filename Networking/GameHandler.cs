@@ -104,15 +104,15 @@ namespace GameServer.Networking
 
 
         // Server -> Game
-        public static async Task TroopsSpawned(int gameId, List<TroopTemplate> templates, List<Vector2Int> positions)
+        public static async Task TroopsSpawned(int gameId, List<TroopTemplate> templates)
         {
             if (!games.TryGetValue(gameId, out Game game))
             {
                 return;
             }
 
-            await ServerSend.TroopsSpawned(game.ClientBlue, templates, positions);
-            await ServerSend.TroopsSpawned(game.ClientRed, templates, positions);
+            await ServerSend.TroopsSpawned(game.ClientBlue, templates);
+            await ServerSend.TroopsSpawned(game.ClientRed, templates);
         }
 
         public static async Task TroopMoved(int gameId, Vector2Int position, int direction, List<BattleResult> battleResults)

@@ -35,7 +35,7 @@ namespace GameServer.Networking
             }
         }
 
-        public static async Task TroopsSpawned(int toClient, List<TroopTemplate> templates, List<Vector2Int> positions)
+        public static async Task TroopsSpawned(int toClient, List<TroopTemplate> templates)
         {
             using (Packet packet = new Packet((int)ServerPackets.TroopSpawned))
             {
@@ -45,7 +45,6 @@ namespace GameServer.Networking
                 for (int i = 0; i < length; i++)
                 {
                     packet.Write(templates[i]);
-                    packet.Write(positions[i]);
                 }
 
                 await SendDataWs(toClient, packet);

@@ -181,6 +181,7 @@ namespace GameServer.Networking
             Write(_value.health);
             Write(_value.movePoints);
             Write(_value.orientation);
+            Write(_value.position);
         }
         /// <summary>Adds a BattleResult to the packet.</summary>
         /// <param name="_value">The BattleResult to add.</param>

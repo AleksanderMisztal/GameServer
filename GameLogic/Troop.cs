@@ -17,15 +17,15 @@ namespace GameServer.GameLogic
         public int Health { get; private set; }
 
 
-        public Troop(TroopTemplate template, Vector2Int position)
+        public Troop(TroopTemplate template)
         {
             ControllingPlayer = template.controllingPlayer;
             InitialMovePoints = template.movePoints;
             Health = template.health;
             Orientation = template.orientation;
 
-            Position = position;
-            StartingPosition = position;
+            Position = template.position;
+            StartingPosition = template.position;
         }
 
         public void JumpForward()

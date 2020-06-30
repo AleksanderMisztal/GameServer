@@ -5,7 +5,7 @@ using System.Net.WebSockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using WebSocketServerAppTest.Utils;
+using GameServer.Utils;
 
 namespace GameServer.Networking
 {

@@ -4,7 +4,7 @@ using System;
 using System.Threading;
 using GameServer.Networking;
 
-namespace WebSocketServerAppTest
+namespace GameServer
 {
     public class Program
     {

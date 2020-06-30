@@ -20,7 +20,7 @@ namespace GameServer.GameLogic
         private int redScore = 0;
 
         private int movePointsLeft;
-        private readonly Dictionary<int, Wave> waves;
+        private readonly Dictionary<int, List<TroopTemplate>> waves;
 
         private readonly HashSet<Troop> blueTroops = new HashSet<Troop>();
         private readonly HashSet<Troop> redTroops = new HashSet<Troop>();
@@ -33,7 +33,7 @@ namespace GameServer.GameLogic
         public GameController(int gameId)
         {
             this.gameId = gameId;
-            waves = Wave.BasicPlanes(out maxBlueWave, out maxRedWave);
+            waves = TroopSpawns.BasicPlanes(out maxBlueWave, out maxRedWave);
         }
 
         public async Task Initialize()
@@ -233,30 +233,18 @@ namespace GameServer.GameLogic
 
         private async Task SpawnNextWave()
         {
-            if (waves.TryGetValue(roundNumber, out Wave wave))
+            if (!waves.TryGetValue(roundNumber, out List<TroopTemplate> wave))
             {
-                await SpawnWave(wave);
+                await GameHandler.TroopsSpawned(gameId, new List<TroopTemplate>());
+                return;
             }
-            else
+
+            foreach (var template in wave)
             {
-                await GameHandler.TroopsSpawned(gameId, new List<TroopTemplate>(), new List<Vector2Int>());
-            }
-        }
+                template.position = GetEmptyCell(template.position);
+                Troop troop = new Troop(template);
 
-        private async Task SpawnWave(Wave wave)
-        {
-            List<TroopTemplate> templates = new List<TroopTemplate>();
-            List<Vector2Int> positions = new List<Vector2Int>();
-
-            foreach(var template in wave.troopTemplates)
-            {
-                Vector2Int position = GetEmptyCell(wave.spawnPosition);
-                Troop troop = new Troop(template, position);
-
-                troopAtPosition.Add(position, troop);
-
-                templates.Add(template);
-                positions.Add(position);
+                troopAtPosition.Add(troop.Position, troop);
 
                 if (troop.ControllingPlayer == PlayerId.Blue)
                 {
@@ -267,7 +255,7 @@ namespace GameServer.GameLogic
                     redTroops.Add(troop);
                 }
             }
-            await GameHandler.TroopsSpawned(gameId, templates, positions);
+            await GameHandler.TroopsSpawned(gameId, wave);
         }
 
         private void SetInitialMovePointsLeft(PlayerId player)

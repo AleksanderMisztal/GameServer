@@ -1,6 +1,6 @@
 ﻿using System.Linq;
 
-namespace WebSocketServerAppTest.Utils
+namespace GameServer.Utils
 {
     public static class Serializer
     {

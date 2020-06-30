@@ -8,7 +8,7 @@ using System.Net.WebSockets;
 using GameServer.Networking;
 using System.Linq;
 
-namespace WebSocketServerAppTest
+namespace GameServer
 {
     public class Startup
     {
