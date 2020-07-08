@@ -11,42 +11,42 @@ namespace GameServer.GameLogic
 
             List<TroopTemplate> wave1 = new List<TroopTemplate>
             {
-                blueTroop.Deploy(8, 7), 
-                blueTroop.Deploy(8, 8), 
-                blueTroop.Deploy(8, 9),
-                blueTroop.Deploy(8, 10),
-                redTroop.Deploy(18, 6),
-                redTroop.Deploy(18, 7),
-                redTroop.Deploy(18, 8),
-                redTroop.Deploy(18, 9),
-                redTroop.Deploy(18, 10)
+                blueTroop.Deploy(2, 7), 
+                blueTroop.Deploy(2, 8), 
+                blueTroop.Deploy(2, 9),
+                blueTroop.Deploy(2, 10),
+                redTroop.Deploy(16, 6),
+                redTroop.Deploy(16, 7),
+                redTroop.Deploy(16, 8),
+                redTroop.Deploy(16, 9),
+                redTroop.Deploy(16, 10)
             };
             List<TroopTemplate> wave3 = new List<TroopTemplate>
             {
-                blueTroop.Deploy(8, 7),
-                blueTroop.Deploy(8, 8),
-                blueTroop.Deploy(8, 9),
-                blueTroop.Deploy(8, 10)
+                blueTroop.Deploy(2, 7),
+                blueTroop.Deploy(2, 8),
+                blueTroop.Deploy(2, 9),
+                blueTroop.Deploy(2, 10)
             };
             List<TroopTemplate> wave4 = new List<TroopTemplate>
             {
-                redTroop.Deploy(18, 6),
-                redTroop.Deploy(18, 7),
-                redTroop.Deploy(18, 8),
-                redTroop.Deploy(18, 9)
+                redTroop.Deploy(16, 6),
+                redTroop.Deploy(16, 7),
+                redTroop.Deploy(16, 8),
+                redTroop.Deploy(16, 9)
             };
             List<TroopTemplate> wave5 = new List<TroopTemplate>
             {
-                blueTroop.Deploy(8, 7),
-                blueTroop.Deploy(8, 8),
-                blueTroop.Deploy(8, 9),
-                blueTroop.Deploy(8, 10)
+                blueTroop.Deploy(2, 7),
+                blueTroop.Deploy(2, 8),
+                blueTroop.Deploy(2, 9),
+                blueTroop.Deploy(2, 10)
             };
             List<TroopTemplate> wave6 = new List<TroopTemplate>
             {
-                redTroop.Deploy(18, 7),
-                redTroop.Deploy(18, 8),
-                redTroop.Deploy(18, 9)
+                redTroop.Deploy(16, 7),
+                redTroop.Deploy(16, 8),
+                redTroop.Deploy(16, 9)
             };
 
             maxBlueWave = 5;
