@@ -65,7 +65,10 @@ namespace GameServer.GameLogic
                 return;
             }
 
-            BattleResult result = Battles.GetFightResult(troop, encounter);
+            BattleResult result = new BattleResult(true, true);
+            if (encounter.ControllingPlayer != troop.ControllingPlayer)
+                result = Battles.GetFightResult(troop, encounter);
+
             battleResults.Add(result);
             if (result.AttackerDamaged) ApplyDamage(troop);
             if (result.DefenderDamaged) ApplyDamage(encounter);
@@ -130,11 +133,16 @@ namespace GameServer.GameLogic
             }
 
             Vector2Int targetPosition = troop.GetAdjacentHex(direction);
-
             if (troopAtPosition.TryGetValue(targetPosition, out Troop encounter) && encounter.ControllingPlayer == player)
             {
-                message = "Attempting to enter a cell with friendly troop!";
-                return false;
+                foreach (var cell in Hex.GetControllZone(troop.Position, troop.Orientation))
+                {
+                    if (!troopAtPosition.TryGetValue(targetPosition, out encounter) || encounter.ControllingPlayer != player)
+                    {
+                        message = "Attempting to enter a cell with friendly troop!";
+                        return false;
+                    }
+                }
             }
 
             return true;
