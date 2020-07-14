@@ -31,5 +31,12 @@ namespace GameServer.Networking
 
             await GameHandler.MoveTroop(fromClient, position, direction);
         }
+
+        public static async Task SendMessage(int fromClient, Packet packet)
+        {
+            string message = packet.ReadString();
+
+            await GameHandler.SendMessage(fromClient, message);
+        }
     }
 }

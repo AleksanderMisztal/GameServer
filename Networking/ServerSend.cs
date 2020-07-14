@@ -79,6 +79,16 @@ namespace GameServer.Networking
             }
         }
 
+        public static async Task MessageSent(int toClient, string message)
+        {
+            using (Packet packet = new Packet((int)ServerPackets.MessageSent))
+            {
+                packet.Write(message);
+
+                await SendDataWs(toClient, packet);
+            }
+        }
+
         public static async Task OpponentDisconnected(int toClient)
         {
             using (Packet packet = new Packet((int)ServerPackets.OpponentDisconnected))

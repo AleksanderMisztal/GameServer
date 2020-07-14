@@ -15,6 +15,7 @@ namespace GameServer.Networking
         TroopMoved = 4,
         GameEnded = 5,
         OpponentDisconnected = 6,
+        MessageSent = 7,
     }
 
     /// <summary>Sent from client to server.</summary>
@@ -23,6 +24,7 @@ namespace GameServer.Networking
         JoinLobby = 1,
         JoinGame = 2,
         MoveTroop = 3,
+        SendMessage = 4,
     }
 
     public class Packet : IDisposable

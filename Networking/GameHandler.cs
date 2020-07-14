@@ -102,6 +102,22 @@ namespace GameServer.Networking
             clientToUsername[client] = username;
         }
 
+        public static async Task SendMessage(int client, string message)
+        {
+            Game game;
+            try
+            {
+                game = clientToGame[client];
+            }
+            catch 
+            {
+                await ServerSend.OpponentDisconnected(client);
+                return;
+            }
+            int oponent = game.ClientBlue ^ game.ClientRed ^ client;
+            await ServerSend.MessageSent(oponent, message);
+        }
+
 
         // Server -> Game
         public static async Task TroopsSpawned(int gameId, List<TroopTemplate> templates)
