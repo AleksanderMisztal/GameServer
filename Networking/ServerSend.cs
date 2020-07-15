@@ -24,12 +24,13 @@ namespace GameServer.Networking
             }
         }
 
-        public static async Task GameJoined(int toClient, string oponentName, PlayerId side)
+        public static async Task GameJoined(int toClient, string oponentName, PlayerId side, BoardParams board)
         {
             using (Packet packet = new Packet((int)ServerPackets.GameJoined))
             {
                 packet.Write(oponentName);
                 packet.Write((int)side);
+                packet.Write(board);
 
                 await SendDataWs(toClient, packet);
             }

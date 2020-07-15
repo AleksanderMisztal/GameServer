@@ -21,6 +21,7 @@ namespace GameServer.GameLogic
 
         private int movePointsLeft;
         private readonly Dictionary<int, List<TroopTemplate>> waves;
+        public BoardParams Board { get; private set; }
 
         private readonly HashSet<Troop> blueTroops = new HashSet<Troop>();
         private readonly HashSet<Troop> redTroops = new HashSet<Troop>();
@@ -34,6 +35,7 @@ namespace GameServer.GameLogic
         {
             this.gameId = gameId;
             waves = TroopSpawns.TestPlanes(out maxBlueWave, out maxRedWave);
+            Board = BoardParams.Standard;
         }
 
         public async Task Initialize()

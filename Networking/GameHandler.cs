@@ -63,6 +63,7 @@ namespace GameServer.Networking
                 playingBlue = waitingClient;
             }
             Game game = new Game(new GameController(nextGameId), playingRed, playingBlue);
+            BoardParams board = game.Controller.Board;
             games.Add(nextGameId, game);
 
             clientToGame[playingRed] = game;
@@ -73,8 +74,8 @@ namespace GameServer.Networking
 
             await game.Controller.Initialize();
 
-            await ServerSend.GameJoined(playingBlue, clientToUsername[playingRed], PlayerId.Blue);
-            await ServerSend.GameJoined(playingRed, clientToUsername[playingBlue], PlayerId.Red);
+            await ServerSend.GameJoined(playingBlue, clientToUsername[playingRed], PlayerId.Blue, board);
+            await ServerSend.GameJoined(playingRed, clientToUsername[playingBlue], PlayerId.Red, board);
 
             nextGameId++;
         }

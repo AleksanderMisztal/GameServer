@@ -20,8 +20,8 @@ namespace GameServer.GameLogic
                 blueTroop.Deploy(7, 7),
             };
 
-            maxBlueWave = 5;
-            maxRedWave = 6;
+            maxBlueWave = 3;
+            maxRedWave = 1;
 
             return new Dictionary<int, List<TroopTemplate>>
             {

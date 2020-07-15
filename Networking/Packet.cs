@@ -192,6 +192,15 @@ namespace GameServer.Networking
             Write(_value.AttackerDamaged);
             Write(_value.DefenderDamaged);
         }
+        /// <summary>Adds a Board to the packet.</summary>
+        /// <param name="_value">The Board to add.</param>
+        public void Write(BoardParams _value)
+        {
+            Write(_value.xMin);
+            Write(_value.xMax);
+            Write(_value.yMin);
+            Write(_value.yMax);
+        }
         #endregion
 
         #region Read Data
