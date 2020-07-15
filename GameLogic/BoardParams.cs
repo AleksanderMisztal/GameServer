@@ -15,6 +15,6 @@
             this.yMax = yMax;
         }
 
-        public static BoardParams Standard => new BoardParams(0, 10, 0, 20);
+        public static BoardParams Standard => new BoardParams(0, 30, 0, 15);
     }
 }
