@@ -34,7 +34,7 @@ namespace GameServer.GameLogic
         public GameController(int gameId)
         {
             this.gameId = gameId;
-            waves = TroopSpawns.TestPlanes(out maxBlueWave, out maxRedWave);
+            waves = TroopSpawns.BasicPlanes(out maxBlueWave, out maxRedWave);
             Board = BoardParams.Standard;
         }
 

@@ -37,8 +37,8 @@ namespace GameServer.GameLogic
 
             List<TroopTemplate> wave1 = new List<TroopTemplate>
             {
-                blueTroop.Deploy(2, 5), 
-                blueTroop.Deploy(2, 6), 
+                blueTroop.Deploy(2, 5),
+                blueTroop.Deploy(2, 6),
                 blueTroop.Deploy(2, 7),
                 blueTroop.Deploy(2, 8),
                 redTroop.Deploy(16, 4),
