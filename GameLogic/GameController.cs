@@ -59,8 +59,8 @@ namespace GameServer.GameLogic
 
             if (!troopAtPosition.TryGetValue(troop.Position, out Troop encounter))
             {
-                await AdjustTroopPosition(troop);
                 await GameHandler.TroopMoved(gameId, position, direction, battleResults);
+                await AdjustTroopPosition(troop);
                 if (movePointsLeft <= 0)
                 {
                     await ToggleActivePlayer();
@@ -88,12 +88,13 @@ namespace GameServer.GameLogic
                 troop.JumpForward();
             }
 
+            await GameHandler.TroopMoved(gameId, position, direction, battleResults);
+
             if (troop.Health > 0) 
             { 
                 await AdjustTroopPosition(troop);
             }
 
-            await GameHandler.TroopMoved(gameId, position, direction, battleResults);
 
             if (gameEnded)
             {
@@ -202,6 +203,7 @@ namespace GameServer.GameLogic
 
             if (troop.Position.IsOutside(Board))
             {
+                aiControlled.Add(troop);
                 await ControllWithAI(troop);
             }
         }
@@ -230,7 +232,6 @@ namespace GameServer.GameLogic
 
                 if (!troop.Position.IsOutside(Board))
                 {
-                    aiControlled.Remove(troop);
                     return;
                 }
             }
@@ -273,6 +274,7 @@ namespace GameServer.GameLogic
             activePlayer = Oponent;
             SetInitialMovePointsLeft(activePlayer);
 
+            aiControlled.RemoveWhere(t => !t.Position.IsOutside(Board));
             foreach (var troop in aiControlled)
             {
                 if (troop.ControllingPlayer == activePlayer)

@@ -11,13 +11,13 @@ namespace GameServer.GameLogic
 
             List<TroopTemplate> wave1 = new List<TroopTemplate>
             {
-                blueTroop.Deploy(7, 7),
-                redTroop.Deploy(11, 6),
-                redTroop.Deploy(11, 7),
+                blueTroop.Deploy(1, 3),
+                redTroop.Deploy(8, 4),
+                redTroop.Deploy(8, 3),
             };
             List<TroopTemplate> wave3 = new List<TroopTemplate>
             {
-                blueTroop.Deploy(7, 7),
+                blueTroop.Deploy(1, 3),
             };
 
             maxBlueWave = 3;

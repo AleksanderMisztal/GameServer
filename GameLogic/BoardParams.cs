@@ -16,5 +16,6 @@
         }
 
         public static BoardParams Standard => new BoardParams(0, 20, 0, 12);
+        public static BoardParams Small => new BoardParams(0, 10, 0, 6);
     }
 }
