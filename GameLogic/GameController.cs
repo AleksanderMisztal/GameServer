@@ -26,6 +26,7 @@ namespace GameServer.GameLogic
         private readonly HashSet<Troop> blueTroops = new HashSet<Troop>();
         private readonly HashSet<Troop> redTroops = new HashSet<Troop>();
         private readonly Dictionary<Vector2Int, Troop> troopAtPosition = new Dictionary<Vector2Int, Troop>();
+        private readonly HashSet<Troop> aiControlled = new HashSet<Troop>();
 
         private PlayerId Oponent => activePlayer == PlayerId.Red ? PlayerId.Blue : PlayerId.Red;
 
@@ -58,7 +59,7 @@ namespace GameServer.GameLogic
 
             if (!troopAtPosition.TryGetValue(troop.Position, out Troop encounter))
             {
-                AdjustTroopPosition(troop);
+                await AdjustTroopPosition(troop);
                 await GameHandler.TroopMoved(gameId, position, direction, battleResults);
                 if (movePointsLeft <= 0)
                 {
@@ -89,7 +90,7 @@ namespace GameServer.GameLogic
 
             if (troop.Health > 0) 
             { 
-                AdjustTroopPosition(troop);
+                await AdjustTroopPosition(troop);
             }
 
             await GameHandler.TroopMoved(gameId, position, direction, battleResults);
@@ -139,7 +140,9 @@ namespace GameServer.GameLogic
             {
                 foreach (var cell in Hex.GetControllZone(troop.Position, troop.Orientation))
                 {
-                    if (!troopAtPosition.TryGetValue(targetPosition, out encounter) || encounter.ControllingPlayer != player)
+                    if (!targetPosition.IsOutside(Board) 
+                        && (!troopAtPosition.TryGetValue(targetPosition, out encounter) 
+                            || encounter.ControllingPlayer != player))
                     {
                         message = "Attempting to enter a cell with friendly troop!";
                         return false;
@@ -190,12 +193,47 @@ namespace GameServer.GameLogic
             }
         }
 
-        private void AdjustTroopPosition(Troop troop)
+        private async Task AdjustTroopPosition(Troop troop)
         {
             troopAtPosition.Remove(troop.StartingPosition);
             troopAtPosition.Add(troop.Position, troop);
 
             troop.StartingPosition = troop.Position;
+
+            if (troop.Position.IsOutside(Board))
+            {
+                await ControllWithAI(troop);
+            }
+        }
+
+        private async Task ControllWithAI(Troop troop)
+        {
+            Vector2Int target = new Vector2Int((Board.xMax + Board.xMin) / 2, (Board.yMax + Board.yMin) / 2);
+
+            while (troop.MovePoints > 0)
+            {
+                int minDist = 1000000;
+                int minDir = 0;
+                for (int dir = -1; dir <= 1; dir += 2)
+                {
+                    Vector2Int neigh = Hex.GetAdjacentHex(troop.Position, (6 + dir + troop.Orientation) % 6);
+                    if (troopAtPosition.TryGetValue(neigh, out _)) continue;
+
+                    int dist = (target - neigh).SqrMagnitude;
+                    if (dist < minDist)
+                    {
+                        minDist = dist;
+                        minDir = dir;
+                    }
+                }
+                await MoveTroop(activePlayer, troop.Position, minDir);
+
+                if (!troop.Position.IsOutside(Board))
+                {
+                    aiControlled.Remove(troop);
+                    return;
+                }
+            }
         }
 
         private Vector2Int GetEmptyCell(Vector2Int seedPosition)
@@ -234,6 +272,14 @@ namespace GameServer.GameLogic
 
             activePlayer = Oponent;
             SetInitialMovePointsLeft(activePlayer);
+
+            foreach (var troop in aiControlled)
+            {
+                if (troop.ControllingPlayer == activePlayer)
+                {
+                    await ControllWithAI(troop);
+                }
+            }
 
             if (movePointsLeft == 0)
             {

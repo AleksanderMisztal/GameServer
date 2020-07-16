@@ -1,9 +1,13 @@
-﻿namespace GameServer.Utils
+﻿using GameServer.GameLogic;
+
+namespace GameServer.Utils
 {
     public class Vector2Int
     {
         public int X { get; }
         public int Y { get; }
+
+        public int SqrMagnitude => X * X + Y * Y;
 
 
         public Vector2Int(int x, int y)
@@ -16,6 +20,11 @@
         {
             X = 0;
             Y = 0;
+        }
+
+        public bool IsOutside(BoardParams b)
+        {
+            return X < b.xMin || X > b.xMax || Y < b.yMin || Y > b.yMax;
         }
 
         public override int GetHashCode()
