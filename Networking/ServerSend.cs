@@ -46,10 +46,12 @@ namespace GameServer.Networking
             }
         }
 
-        public static async Task TroopsSpawned(int toClient, List<TroopTemplate> templates)
+        public static async Task TroopsSpawned(int toClient, int timeStamp, List<TroopTemplate> templates)
         {
             using (Packet packet = new Packet((int)ServerPackets.TroopSpawned))
             {
+                packet.Write(timeStamp);
+
                 int length = templates.Count;
                 packet.Write(length);
 

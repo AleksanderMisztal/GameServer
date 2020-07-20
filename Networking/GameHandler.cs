@@ -12,12 +12,14 @@ namespace GameServer.Networking
         public int ClientRed { get; }
         public int ClientBlue { get; }
 
+        public int StartTime { get; }
 
-        public Game(GameController controller, int clientRed, int clientBlue)
+        public Game(GameController controller, int clientRed, int clientBlue, int startTime)
         {
             Controller = controller;
             ClientRed = clientRed;
             ClientBlue = clientBlue;
+            StartTime = startTime;
         }
 
         public override string ToString()
@@ -62,7 +64,8 @@ namespace GameServer.Networking
                 playingRed = client;
                 playingBlue = waitingClient;
             }
-            Game game = new Game(new GameController(nextGameId), playingRed, playingBlue);
+            int startTime = (int)DateTime.Now.TimeOfDay.TotalSeconds;
+            Game game = new Game(new GameController(nextGameId), playingRed, playingBlue, startTime);
             BoardParams board = game.Controller.Board;
             games.Add(nextGameId, game);
 
@@ -128,8 +131,10 @@ namespace GameServer.Networking
                 return;
             }
 
-            await ServerSend.TroopsSpawned(game.ClientBlue, templates);
-            await ServerSend.TroopsSpawned(game.ClientRed, templates);
+            int timeStamp = (int)DateTime.Now.TimeOfDay.TotalSeconds - game.StartTime;
+
+            await ServerSend.TroopsSpawned(game.ClientBlue, timeStamp, templates);
+            await ServerSend.TroopsSpawned(game.ClientRed, timeStamp, templates);
         }
 
         public static async Task TroopMoved(int gameId, Vector2Int position, int direction, List<BattleResult> battleResults)
