@@ -24,6 +24,7 @@ namespace GameServer.Networking
         {
             private readonly int id;
             public WebSocket socket;
+            private bool isConnected = false;
 
             public WsClient(int id)
             {
@@ -33,9 +34,12 @@ namespace GameServer.Networking
             public async Task Connect(WebSocket socket)
             {
                 this.socket = socket;
+                isConnected = true;
                 await ServerSend.Welcome(id, "Welcome to the server!");
-                await BeginReceive();
-
+                while (isConnected)
+                {
+                    await BeginReceive();
+                }
             }
 
             private async Task<byte[]> Receive()
@@ -79,14 +83,14 @@ namespace GameServer.Networking
                 }
                 catch (WebSocketException ex)
                 {
-                    Console.WriteLine(ex);
+                    Console.WriteLine($"Exception occured: {ex}. Disconnecting client {id}.");
+                    isConnected = false;
                     await GameHandler.ClientDisconnected(id);
                     return;
                 }
                 
                 if (data == null)
                 {
-                    await BeginReceive();
                     return;
                 }
 
@@ -105,8 +109,6 @@ namespace GameServer.Networking
                         }
                     }
                 });
-
-                await BeginReceive();
             }
 
             public async Task SendData(Packet packet)

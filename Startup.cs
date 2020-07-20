@@ -42,10 +42,10 @@ namespace GameServer
 
             app.Run(async context =>
             {
-                string[] css = GameHandler.Clients.Select(item => $"({item.Key} : {item.Value})").ToArray();
+                string[] css = GameHandler.clientToUsername.Select(item => $"({item.Key} : {item.Value})").ToArray();
                 string cs = string.Join("\n", css);
 
-                string[] gss = GameHandler.Games.Select(item => $"{item.Key} : {item.Value}").ToArray();
+                string[] gss = GameHandler.games.Select(item => $"{item.Key} : {item.Value}").ToArray();
                 string gs = string.Join("\n", gss);
 
                 await context.Response.WriteAsync(cs + "\n" + gs);

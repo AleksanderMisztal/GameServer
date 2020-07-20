@@ -28,10 +28,10 @@ namespace GameServer.Networking
 
     public static class GameHandler
     {
-        private static readonly Dictionary<int, Game> games = new Dictionary<int, Game>();
+        public static readonly Dictionary<int, Game> games = new Dictionary<int, Game>();
         private static readonly Dictionary<int, Game> clientToGame = new Dictionary<int, Game>();
         private static readonly Dictionary<int, PlayerId> clientToColor = new Dictionary<int, PlayerId>();
-        private static readonly Dictionary<int, string> clientToUsername = new Dictionary<int, string>();
+        public static readonly Dictionary<int, string> clientToUsername = new Dictionary<int, string>();
 
         private static int nextGameId = 0;
         private static bool someoneWaiting = false;
@@ -144,14 +144,13 @@ namespace GameServer.Networking
         {
             Game game = games[gameId];
 
+            games.Remove(gameId);
+            clientToGame.Remove(game.ClientBlue);
+            clientToGame.Remove(game.ClientRed);
+
             await ServerSend.GameEnded(game.ClientBlue, redScore, blueScore);
             await ServerSend.GameEnded(game.ClientRed, redScore, blueScore);
         }
-
-
-        // For displaying status
-        public static Dictionary<int, string> Clients => clientToUsername;
-        public static Dictionary<int, Game> Games => games;
 
         // Internal
         public static async Task ClientDisconnected(int clientId)
@@ -163,6 +162,11 @@ namespace GameServer.Networking
             if (clientToGame.TryGetValue(clientId, out Game game))
             {
                 int oponent = clientId ^ game.ClientBlue ^ game.ClientRed;
+
+                clientToGame.Remove(clientId);
+                clientToGame.Remove(oponent);
+                games.Remove(game.Controller.gameId);
+
                 await ServerSend.OpponentDisconnected(oponent);
             }
         }

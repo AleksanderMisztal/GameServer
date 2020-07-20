@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Net.WebSockets;
 using System.Threading.Tasks;
 using GameServer.GameLogic;
 using GameServer.Utils;
@@ -9,7 +11,15 @@ namespace GameServer.Networking
     {
         private static async Task SendDataWs(int toClient, Packet packet)
         {
-            await Server.clients[toClient].wsClient.SendData(packet);
+            try
+            {
+                await Server.clients[toClient].wsClient.SendData(packet);
+            }
+            catch (WebSocketException ex)
+            {
+                Console.WriteLine("Exception thrown by server while sending data: " + ex);
+                await GameHandler.ClientDisconnected(toClient);
+            }
         }
         
 
