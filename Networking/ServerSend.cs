@@ -50,8 +50,6 @@ namespace GameServer.Networking
         {
             using (Packet packet = new Packet((int)ServerPackets.TroopSpawned))
             {
-                packet.Write(timeStamp);
-
                 int length = templates.Count;
                 packet.Write(length);
 
@@ -59,6 +57,8 @@ namespace GameServer.Networking
                 {
                     packet.Write(templates[i]);
                 }
+
+                packet.Write(timeStamp);
 
                 await SendDataWs(toClient, packet);
             }
@@ -106,6 +106,15 @@ namespace GameServer.Networking
         {
             using (Packet packet = new Packet((int)ServerPackets.OpponentDisconnected))
             {
+                await SendDataWs(toClient, packet);
+            }
+        }
+
+        public static async Task LostOnTime(int toClient, PlayerId looser)
+        {
+            using (Packet packet = new Packet((int)ServerPackets.LostOnTime))
+            {
+                packet.Write((int)looser);
                 await SendDataWs(toClient, packet);
             }
         }

@@ -16,6 +16,7 @@ namespace GameServer.Networking
         GameEnded = 5,
         OpponentDisconnected = 6,
         MessageSent = 7,
+        LostOnTime = 8,
     }
 
     /// <summary>Sent from client to server.</summary>

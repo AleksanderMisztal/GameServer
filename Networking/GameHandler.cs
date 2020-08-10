@@ -13,6 +13,41 @@ namespace GameServer.Networking
         public int ClientBlue { get; }
 
         public int StartTime { get; }
+        public int BlueTime { get; private set; } = 60;
+        public int RedTime { get; private set; } = 60;
+        public int LastMoveTime { get; set; }
+        public PlayerId LastMoving { get; set; } = PlayerId.Red;
+
+        public async void OnMove(int timeStamp)
+        {
+            int elapsed = timeStamp - LastMoveTime;
+            LastMoveTime = timeStamp;
+            int timeLeft = LastMoving == PlayerId.Red ? BlueTime -= elapsed : RedTime -= elapsed;
+            LastMoving = LastMoving == PlayerId.Red ? PlayerId.Blue : PlayerId.Red;
+
+            await Task.Delay(timeLeft + 1);
+            if (!Controller.gameEnded)
+            {
+                if (LastMoving == PlayerId.Red)
+                {
+                    int now = (int)DateTime.Now.TimeOfDay.TotalSeconds;
+                    if (now - LastMoveTime > BlueTime)
+                    {
+                        await ServerSend.LostOnTime(ClientBlue, PlayerId.Blue);
+                        await ServerSend.LostOnTime(ClientRed, PlayerId.Blue);
+                    }
+                }
+                if (LastMoving == PlayerId.Blue)
+                {
+                    int now = (int)DateTime.Now.TimeOfDay.TotalSeconds;
+                    if (now - LastMoveTime > RedTime)
+                    {
+                        await ServerSend.LostOnTime(ClientBlue, PlayerId.Red);
+                        await ServerSend.LostOnTime(ClientRed, PlayerId.Red);
+                    }
+                }
+            }
+        }
 
         public Game(GameController controller, int clientRed, int clientBlue, int startTime)
         {
@@ -20,6 +55,7 @@ namespace GameServer.Networking
             ClientRed = clientRed;
             ClientBlue = clientBlue;
             StartTime = startTime;
+            LastMoveTime = startTime;
         }
 
         public override string ToString()
@@ -40,6 +76,11 @@ namespace GameServer.Networking
         private static int waitingClient;
 
         // Game -> Server
+        public static void AddToLobby(int client, string username)
+        {
+            clientToUsername[client] = username;
+        }
+
         public static async Task SendToGame(int client)
         {
             if (!someoneWaiting)
@@ -64,6 +105,7 @@ namespace GameServer.Networking
                 playingRed = client;
                 playingBlue = waitingClient;
             }
+
             int startTime = (int)DateTime.Now.TimeOfDay.TotalSeconds;
             Game game = new Game(new GameController(nextGameId), playingRed, playingBlue, startTime);
             BoardParams board = game.Controller.Board;
@@ -101,11 +143,6 @@ namespace GameServer.Networking
             }
         }
 
-        public static void AddToLobby(int client, string username)
-        {
-            clientToUsername[client] = username;
-        }
-
         public static async Task SendMessage(int client, string message)
         {
             Game game;
@@ -132,6 +169,7 @@ namespace GameServer.Networking
             }
 
             int timeStamp = (int)DateTime.Now.TimeOfDay.TotalSeconds - game.StartTime;
+            game.OnMove(timeStamp);
 
             await ServerSend.TroopsSpawned(game.ClientBlue, timeStamp, templates);
             await ServerSend.TroopsSpawned(game.ClientRed, timeStamp, templates);
