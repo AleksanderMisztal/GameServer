@@ -1,6 +1,6 @@
 ﻿namespace GameServer.GameLogic
 {
-    public interface IBattles
+    public interface IBattleResolver
     {
         public BattleResult GetFightResult(Troop attacker, Troop defender);
 

@@ -72,10 +72,7 @@ namespace GameServer.GameLogic
             return false;
         }
 
-        public void OnTurnEnd()
-        {
-            StartingPosition = Position;
-        }
+        public void OnTurnEnd() { }
 
         public void OnTurnBegin()
         {

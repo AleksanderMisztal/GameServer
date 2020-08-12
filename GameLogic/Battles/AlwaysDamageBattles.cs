@@ -1,6 +1,6 @@
 ﻿namespace GameServer.GameLogic.Battles
 {
-    public class AlwaysDamageBattles : IBattles
+    public class AlwaysDamageBattles : IBattleResolver
     {
         public BattleResult GetCollisionResult()
         {

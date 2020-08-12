@@ -70,13 +70,10 @@ namespace GameServer.Networking
             await ServerSend.SendEvent(playingRed, redGameJoined);
             await ServerSend.SendEvent(playingBlue, blueGameJoined);
 
-            var events = game.Controller.InitializeAndReturnEvents();
+            var ev = game.Controller.InitializeAndReturnEvents();
 
-            foreach (var ev in events)
-            {
-                await ServerSend.SendEvent(playingRed, ev);
-                await ServerSend.SendEvent(playingBlue, ev);
-            }
+            await ServerSend.SendEvent(playingRed, ev);
+            await ServerSend.SendEvent(playingBlue, ev);
         }
 
         public static async Task MoveTroop(int client, Vector2Int position, int direction)

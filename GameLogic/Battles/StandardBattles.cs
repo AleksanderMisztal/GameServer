@@ -2,7 +2,7 @@
 
 namespace GameServer.GameLogic
 {
-    public class StandardBattles : IBattles
+    public class StandardBattles : IBattleResolver
     {
         private static readonly Random random = new Random();
 
