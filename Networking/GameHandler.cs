@@ -116,39 +116,6 @@ namespace GameServer.Networking
         }
 
 
-        // Server -> Game
-        public static async Task TroopsSpawned(int gameId, List<TroopTemplate> templates)
-        {
-            if (!games.TryGetValue(gameId, out Game game))
-            {
-                return;
-            }
-
-            await ServerSend.SendEvent(game.ClientRed, new TroopsSpawnedEvent(templates));
-            await ServerSend.SendEvent(game.ClientBlue, new TroopsSpawnedEvent(templates));
-        }
-
-        public static async Task TroopMoved(int gameId, Vector2Int position, int direction, List<BattleResult> battleResults)
-        {
-            Game game = games[gameId];
-
-            await ServerSend.SendEvent(game.ClientBlue, new TroopMovedEvent(position, direction, battleResults));
-            await ServerSend.SendEvent(game.ClientRed, new TroopMovedEvent(position, direction, battleResults));
-        }
-
-        public static async Task GameEnded(int gameId, int redScore, int blueScore)
-        {
-            Game game = games[gameId];
-
-            games.Remove(gameId);
-            clientToGame.Remove(game.ClientBlue);
-            clientToGame.Remove(game.ClientRed);
-
-            await ServerSend.SendEvent(game.ClientRed, new GameEndedEvent(redScore, blueScore));
-            await ServerSend.SendEvent(game.ClientBlue, new GameEndedEvent(redScore, blueScore));
-        }
-
-        // Internal
         public static async Task ClientDisconnected(int clientId)
         {
             if (someoneWaiting && clientId == waitingClient)
