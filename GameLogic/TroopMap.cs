@@ -5,7 +5,10 @@ namespace GameServer.GameLogic
 {
     public class TroopMap
     {
-        private Dictionary<Vector2Int, Troop> map;
+        private readonly Dictionary<Vector2Int, Troop> map;
+
+        private readonly HashSet<Troop> redTroops = new HashSet<Troop>();
+        private readonly HashSet<Troop> blueTroops = new HashSet<Troop>();
 
         public TroopMap()
         {
@@ -20,9 +23,15 @@ namespace GameServer.GameLogic
             troop.StartingPosition = troop.Position;
         }
 
+        public HashSet<Troop> GetTroops(PlayerId player)
+        {
+            return player == PlayerId.Red ? redTroops : blueTroops;
+        }
+
         public void Add(Troop troop)
         {
             map.Add(troop.Position, troop);
+            GetTroops(troop.ControllingPlayer).Add(troop);
         }
 
         public Troop Get(Vector2Int position)
@@ -40,6 +49,7 @@ namespace GameServer.GameLogic
         public void Remove(Troop troop)
         {
             map.Remove(troop.StartingPosition);
+            GetTroops(troop.ControllingPlayer).Remove(troop);
         }
 
         // TODO: Change from "dfs" to iterative bfs

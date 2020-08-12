@@ -1,8 +1,8 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Collections.Generic;
 using GameServer.Utils;
 using GameServer.GameLogic.ServerEvents;
-using System;
 
 namespace GameServer.GameLogic
 {
@@ -19,8 +19,6 @@ namespace GameServer.GameLogic
         private readonly Board board;
 
         private readonly TroopMap troopMap = new TroopMap();
-        private readonly HashSet<Troop> blueTroops = new HashSet<Troop>();
-        private readonly HashSet<Troop> redTroops = new HashSet<Troop>();
         private readonly HashSet<Troop> aiControlled = new HashSet<Troop>();
 
 
@@ -57,8 +55,8 @@ namespace GameServer.GameLogic
             var troopsSpawnedEvent = AddSpawnsForCurrentRoundAndReturnEvent();
             events.Add(troopsSpawnedEvent);
 
-            HashSet<Troop> beginningTroops = activePlayer == PlayerId.Blue ? redTroops : blueTroops;
-            HashSet<Troop> endingTroops = activePlayer == PlayerId.Blue ? blueTroops : redTroops;
+            HashSet<Troop> beginningTroops = troopMap.GetTroops(activePlayer.Opponent());
+            HashSet<Troop> endingTroops = troopMap.GetTroops(activePlayer);
 
             foreach (var troop in beginningTroops)
                 troop.OnTurnBegin();
@@ -90,11 +88,6 @@ namespace GameServer.GameLogic
                 Troop troop = new Troop(template);
 
                 troopMap.Add(troop);
-
-                if (troop.ControllingPlayer == PlayerId.Blue)
-                    blueTroops.Add(troop);
-                else
-                    redTroops.Add(troop);
             }
 
             return new TroopsSpawnedEvent(wave);
@@ -102,7 +95,7 @@ namespace GameServer.GameLogic
 
         private void SetInitialMovePointsLeft(PlayerId player)
         {
-            HashSet<Troop> troops = player == PlayerId.Blue ? blueTroops : redTroops;
+            HashSet<Troop> troops = troopMap.GetTroops(player);
             movePointsLeft = troops.Aggregate(0, (acc, t) => acc + t.InitialMovePoints);
         }
 
@@ -140,8 +133,8 @@ namespace GameServer.GameLogic
 
         private bool GameHasEnded()
         {
-            bool redLost = redTroops.Count == 0 && waves.maxRedWave <= roundNumber;
-            bool blueLost = blueTroops.Count == 0 && waves.maxBlueWave <= roundNumber;
+            bool redLost = troopMap.GetTroops(PlayerId.Red).Count == 0 && waves.maxRedWave <= roundNumber;
+            bool blueLost = troopMap.GetTroops(PlayerId.Blue).Count == 0 && waves.maxBlueWave <= roundNumber;
 
             return redLost || blueLost;
         }
@@ -253,10 +246,7 @@ namespace GameServer.GameLogic
 
         private void DestroyTroop(Troop troop)
         {
-            HashSet<Troop> friendlyTroops = troop.ControllingPlayer == PlayerId.Blue ? blueTroops : redTroops;
-
             troopMap.Remove(troop);
-            friendlyTroops.Remove(troop);
 
             if (troop.ControllingPlayer == activePlayer)
                 movePointsLeft -= troop.MovePoints;
