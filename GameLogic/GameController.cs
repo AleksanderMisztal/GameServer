@@ -68,7 +68,7 @@ namespace GameServer.GameLogic
 
             foreach (var troop in aiControlled)
             {
-                if (troop.ControllingPlayer == activePlayer)
+                if (troop.Player == activePlayer)
                 {
                     var moveEvents = ControllWithAI(troop);
                     events.AddRange(moveEvents);
@@ -156,7 +156,7 @@ namespace GameServer.GameLogic
                 return false;
             }
 
-            if (troop.ControllingPlayer != player)
+            if (troop.Player != player)
             {
                 message = "Attempting to move enemy troop!";
                 return false;
@@ -170,13 +170,13 @@ namespace GameServer.GameLogic
 
             Vector2Int targetPosition = troop.GetAdjacentHex(direction);
             Troop encounter = troopMap.Get(targetPosition);
-            if (encounter != null && encounter.ControllingPlayer == player)
+            if (encounter != null && encounter.Player == player)
             {
                 foreach (var cell in Hex.GetControllZone(troop.Position, troop.Orientation))
                 {
                     encounter = troopMap.Get(targetPosition);
                     if (!targetPosition.IsOutside(board)
-                        && (encounter != null || encounter.ControllingPlayer != player))
+                        && (encounter != null || encounter.Player != player))
                     {
                         message = "Attempting to enter a cell with friendly troop!";
                         return false;
@@ -203,7 +203,7 @@ namespace GameServer.GameLogic
             }
 
             BattleResult result = new BattleResult(true, true);
-            if (encounter.ControllingPlayer != troop.ControllingPlayer)
+            if (encounter.Player != troop.Player)
                 result = battleResolver.GetFightResult(troop, encounter);
 
             battleResults.Add(result);
@@ -232,10 +232,10 @@ namespace GameServer.GameLogic
 
         private void ApplyDamage(Troop troop)
         {
-            PlayerId opponent = troop.ControllingPlayer.Opponent();
+            PlayerId opponent = troop.Player.Opponent();
             score.Increment(opponent);
 
-            if (troop.ControllingPlayer == activePlayer && troop.MovePoints > 0)
+            if (troop.Player == activePlayer && troop.MovePoints > 0)
                 movePointsLeft--;
 
             troop.ApplyDamage();
@@ -248,7 +248,7 @@ namespace GameServer.GameLogic
         {
             troopMap.Remove(troop);
 
-            if (troop.ControllingPlayer == activePlayer)
+            if (troop.Player == activePlayer)
                 movePointsLeft -= troop.MovePoints;
         }
 

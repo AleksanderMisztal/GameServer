@@ -180,7 +180,7 @@ namespace GameServer.Networking
         /// <param name="_value">The TroopTemplate to add.</param>
         public void Write(TroopTemplate _value)
         {
-            Write((int)_value.controllingPlayer);
+            Write((int)_value.player);
             Write(_value.health);
             Write(_value.movePoints);
             Write(_value.orientation);

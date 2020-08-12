@@ -4,7 +4,7 @@ namespace GameServer.GameLogic
 {
     public class Troop
     {
-        public PlayerId ControllingPlayer { get; }
+        public PlayerId Player { get; }
 
         public int InitialMovePoints { get; private set; }
         public int MovePoints { get; private set; }
@@ -18,7 +18,7 @@ namespace GameServer.GameLogic
 
         public Troop(TroopTemplate template)
         {
-            ControllingPlayer = template.controllingPlayer;
+            Player = template.player;
             InitialMovePoints = template.movePoints;
             Health = template.health;
             Orientation = template.orientation;
@@ -79,7 +79,7 @@ namespace GameServer.GameLogic
 
         public override string ToString()
         {
-            return $"cp: {ControllingPlayer}, p: {Position}, o: {Orientation}, imp: {InitialMovePoints}, mp: {MovePoints}, h: {Health}";
+            return $"cp: {Player}, p: {Position}, o: {Orientation}, imp: {InitialMovePoints}, mp: {MovePoints}, h: {Health}";
         }
     }
 }

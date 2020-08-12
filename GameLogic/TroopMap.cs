@@ -31,7 +31,7 @@ namespace GameServer.GameLogic
         public void Add(Troop troop)
         {
             map.Add(troop.Position, troop);
-            GetTroops(troop.ControllingPlayer).Add(troop);
+            GetTroops(troop.Player).Add(troop);
         }
 
         public Troop Get(Vector2Int position)
@@ -49,7 +49,7 @@ namespace GameServer.GameLogic
         public void Remove(Troop troop)
         {
             map.Remove(troop.StartingPosition);
-            GetTroops(troop.ControllingPlayer).Remove(troop);
+            GetTroops(troop.Player).Remove(troop);
         }
 
         // TODO: Change from "dfs" to iterative bfs
