@@ -13,13 +13,6 @@
             Z = z;
         }
 
-        public Vector3Int()
-        {
-            X = 0;
-            Y = 0;
-            Z = 0;
-        }
-
         public Vector3Int Abs()
         {
             return new Vector3Int(

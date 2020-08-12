@@ -83,7 +83,7 @@ namespace GameServer.Networking
                 PlayerId color = clientToColor[client];
                 try
                 {
-                    List<IServerEvent> events = game.Controller.ProcessMoveRequest(color, position, direction);
+                    List<IServerEvent> events = game.Controller.ProcessMove(color, position, direction);
                     foreach (var ev in events)
                     {
                         await ServerSend.SendEvent(game.ClientBlue, ev);

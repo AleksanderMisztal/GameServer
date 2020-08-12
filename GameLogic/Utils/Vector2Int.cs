@@ -1,6 +1,4 @@
-﻿using GameServer.GameLogic;
-
-namespace GameServer.Utils
+﻿namespace GameServer.Utils
 {
     public class Vector2Int
     {

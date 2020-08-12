@@ -40,11 +40,11 @@ namespace GameServer.GameLogic
         }
 
         
-        public TroopsSpawnedEvent InitializeAndReturnEvent()
+        public NewRoundEvent InitializeAndReturnEvent()
         {
             if (roundNumber == 0)
             {
-                return (TroopsSpawnedEvent)ToggleActivePlayerAndReturnEvents()[0];
+                return (NewRoundEvent)ToggleActivePlayerAndReturnEvents()[0];
             }
             throw new Exception("This game controller has already been initialized");
         }
@@ -76,11 +76,11 @@ namespace GameServer.GameLogic
             SetInitialMovePointsLeft(activePlayer);
         }
 
-        private TroopsSpawnedEvent AddSpawnsForCurrentRoundAndReturnEvent()
+        private NewRoundEvent AddSpawnsForCurrentRoundAndReturnEvent()
         {
             List<TroopTemplate> wave = waves.GetTroops(roundNumber);
             wave = troopMap.SpawnWave(wave);
-            return new TroopsSpawnedEvent(wave);
+            return new NewRoundEvent(wave);
         }
 
         private void SetInitialMovePointsLeft(PlayerId player)
@@ -90,14 +90,21 @@ namespace GameServer.GameLogic
         }
 
 
-        public List<IServerEvent> ProcessMoveRequest(PlayerId player, Vector2Int position, int direction)
+        public List<IServerEvent> ProcessMove(PlayerId player, Vector2Int position, int direction)
         {
             List<IServerEvent> events = new List<IServerEvent>();
 
             if (validator.IsLegalMove(player, position, direction, board))
             {
+                Troop troop = troopMap.Get(position);
                 TroopMovedEvent mainMove = MoveTroop(position, direction);
                 events.Add(mainMove);
+                if (board.IsOutside(troop.Position))
+                {
+                    aiControlled.Add(troop);
+                    var aiMoveEvents = ControllWithAI(troop);
+                    events.AddRange(aiMoveEvents);
+                }
 
                 while (!GameHasEnded())
                 {
@@ -146,7 +153,7 @@ namespace GameServer.GameLogic
             if (result.AttackerDamaged) ApplyDamage(troop);
             if (result.DefenderDamaged) ApplyDamage(encounter);
 
-            troop.JumpForward();
+            troop.MoveForward();
             
             while ((encounter = troopMap.Get(troop.Position)) != null && troop.Health > 0)
             {
@@ -155,7 +162,7 @@ namespace GameServer.GameLogic
                 if (result.AttackerDamaged) ApplyDamage(troop);
                 if (result.DefenderDamaged) ApplyDamage(encounter);
 
-                troop.JumpForward();
+                troop.MoveForward();
             }
 
             if (troop.Health > 0)

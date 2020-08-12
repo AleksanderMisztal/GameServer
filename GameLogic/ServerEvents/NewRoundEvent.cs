@@ -4,11 +4,11 @@ using System.Text;
 
 namespace GameServer.GameLogic.ServerEvents
 {
-    public class TroopsSpawnedEvent : IServerEvent
+    public class NewRoundEvent : IServerEvent
     {
         private List<TroopTemplate> troopTemplates;
 
-        public TroopsSpawnedEvent(List<TroopTemplate> troopTemplates)
+        public NewRoundEvent(List<TroopTemplate> troopTemplates)
         {
             this.troopTemplates = troopTemplates;
         }
@@ -28,7 +28,7 @@ namespace GameServer.GameLogic.ServerEvents
 
         public string GetString()
         {
-            StringBuilder sb = new StringBuilder("Troop spawned event\n");
+            StringBuilder sb = new StringBuilder("New round event\n");
             foreach (var t in troopTemplates) sb.Append(t).Append("\n");
             return sb.ToString();
         }

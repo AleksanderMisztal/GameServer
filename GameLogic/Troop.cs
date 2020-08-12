@@ -27,7 +27,7 @@ namespace GameServer.GameLogic
             StartingPosition = template.position;
         }
 
-        public void JumpForward()
+        public void MoveForward()
         {
             Position = Hex.GetAdjacentHex(Position, Orientation);
         }
