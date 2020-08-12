@@ -45,10 +45,13 @@ namespace GameServer.GameLogic
         }
 
 
-        public List<IServerEvent> InitializeAndReturnEvents()
+        public TroopsSpawnedEvent InitializeAndReturnEvents()
         {
-            var events = ToggleActivePlayerAndReturnEvents();
-            return events;
+            if (roundNumber == 0)
+            {
+                return AddSpawnsForCurrentRoundAndReturnEvent();
+            }
+            throw new Exception("This game controller has already been initialized");
         }
 
         private List<IServerEvent> ToggleActivePlayerAndReturnEvents()
@@ -111,7 +114,8 @@ namespace GameServer.GameLogic
             return new TroopsSpawnedEvent(wave);
         }
 
-        //TODO: Change from dfs to iterative bfs
+        // TODO: Change from dfs to iterative bfs
+        // TODO: Don't return cells outside the board
         private Vector2Int GetEmptyCell(Vector2Int seedPosition)
         {
             if (!troopAtPosition.TryGetValue(seedPosition, out _)) return seedPosition;
