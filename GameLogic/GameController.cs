@@ -40,7 +40,7 @@ namespace GameServer.GameLogic
         }
 
         
-        public TroopsSpawnedEvent InitializeAndReturnEvents()
+        public TroopsSpawnedEvent InitializeAndReturnEvent()
         {
             if (roundNumber == 0)
             {
@@ -52,12 +52,21 @@ namespace GameServer.GameLogic
         private List<IServerEvent> ToggleActivePlayerAndReturnEvents()
         {
             roundNumber++;
-
             List<IServerEvent> events = new List<IServerEvent>();
 
             var troopsSpawnedEvent = AddSpawnsForCurrentRoundAndReturnEvent();
             events.Add(troopsSpawnedEvent);
 
+            ChangeActivePlayer();
+
+            var aiMoveEvents = ExecuteAiMoves();
+            events.AddRange(aiMoveEvents);
+
+            return events;
+        }
+
+        private void ChangeActivePlayer()
+        {
             HashSet<Troop> beginningTroops = troopMap.GetTroops(activePlayer.Opponent());
             foreach (var troop in beginningTroops)
                 troop.ResetMovePoints();
@@ -65,31 +74,12 @@ namespace GameServer.GameLogic
             activePlayer = activePlayer.Opponent();
             validator.ToggleActivePlayer();
             SetInitialMovePointsLeft(activePlayer);
-
-            foreach (var troop in aiControlled)
-            {
-                if (troop.Player == activePlayer)
-                {
-                    var moveEvents = ControllWithAI(troop);
-                    events.AddRange(moveEvents);
-                }
-            }
-
-            return events;
         }
 
         private TroopsSpawnedEvent AddSpawnsForCurrentRoundAndReturnEvent()
         {
             List<TroopTemplate> wave = waves.GetTroops(roundNumber);
-
-            foreach (var template in wave)
-            {
-                template.position = troopMap.GetEmptyCell(template.position);
-                Troop troop = new Troop(template);
-
-                troopMap.Add(troop);
-            }
-
+            wave = troopMap.SpawnWave(wave);
             return new TroopsSpawnedEvent(wave);
         }
 
@@ -121,10 +111,7 @@ namespace GameServer.GameLogic
                 GameEndedEvent gameEndEvent = new GameEndedEvent(score);
                 events.Add(gameEndEvent);
             }
-            else
-            {
-                // TODO: handle illegal move
-            }
+
             return events;
         }
 
@@ -199,6 +186,20 @@ namespace GameServer.GameLogic
 
             if (troop.Player == activePlayer)
                 movePointsLeft -= troop.MovePoints;
+        }
+
+        private List<TroopMovedEvent> ExecuteAiMoves()
+        {
+            List<TroopMovedEvent> events = new List<TroopMovedEvent>();
+            foreach (var troop in aiControlled)
+            {
+                if (troop.Player == activePlayer)
+                {
+                    var moveEvents = ControllWithAI(troop);
+                    events.AddRange(moveEvents);
+                }
+            }
+            return events;
         }
 
         // TODO: Extract a TroopAI class

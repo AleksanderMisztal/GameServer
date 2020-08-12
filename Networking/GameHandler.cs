@@ -70,7 +70,7 @@ namespace GameServer.Networking
             await ServerSend.SendEvent(playingRed, redGameJoined);
             await ServerSend.SendEvent(playingBlue, blueGameJoined);
 
-            var ev = game.Controller.InitializeAndReturnEvents();
+            var ev = game.Controller.InitializeAndReturnEvent();
 
             await ServerSend.SendEvent(playingRed, ev);
             await ServerSend.SendEvent(playingBlue, ev);
