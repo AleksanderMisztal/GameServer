@@ -4,28 +4,26 @@ namespace GameServer.GameLogic.ServerEvents
 {
     public class GameEndedEvent : IServerEvent
     {
-        private int redScore;
-        private int blueScore;
+        private readonly Score score;
 
-        public GameEndedEvent(int redScore, int blueScore)
+        public GameEndedEvent(Score score)
         {
-            this.redScore = redScore;
-            this.blueScore = blueScore;
+            this.score = score;
         }
 
         public Packet GetPacket()
         {
             Packet packet = new Packet((int)ServerPackets.GameEnded);
 
-            packet.Write(redScore);
-            packet.Write(blueScore);
+            packet.Write(score.Red);
+            packet.Write(score.Blue);
 
             return packet;
         }
 
         public string GetString()
         {
-            return $"Game ended event\nRed: {redScore}, blue: {blueScore}";
+            return $"Game ended event\nRed: {score.Red}, blue: {score.Blue}";
         }
     }
 }
