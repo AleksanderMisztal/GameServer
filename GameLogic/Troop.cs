@@ -69,9 +69,7 @@ namespace GameServer.GameLogic
             return false;
         }
 
-        public void OnTurnEnd() { }
-
-        public void OnTurnBegin()
+        public void ResetMovePoints()
         {
             MovePoints = InitialMovePoints;
         }

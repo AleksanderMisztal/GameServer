@@ -12,11 +12,12 @@ namespace GameServer.GameLogic
         private int roundNumber = 0;
         private int movePointsLeft;
 
-        private readonly Score score;
+        private readonly Score score = new Score();
 
         private readonly IBattleResolver battleResolver;
         private readonly Waves waves;
         private readonly Board board;
+        private readonly MoveValidator validator;
 
         private readonly TroopMap troopMap = new TroopMap();
         private readonly HashSet<Troop> aiControlled = new HashSet<Troop>();
@@ -24,16 +25,18 @@ namespace GameServer.GameLogic
 
         public GameController(Waves waves, Board board)
         {
-            this.battleResolver = new StandardBattles();
+            battleResolver = new StandardBattles();
             this.waves = waves;
             this.board = board;
+            validator = new MoveValidator(troopMap, activePlayer);
         }
 
-        public GameController(IBattleResolver battles, Board board, Waves waves)
+        public GameController(IBattleResolver battleResolver, Board board, Waves waves)
         {
-            this.battleResolver = battles;
+            this.battleResolver = battleResolver;
             this.waves = waves;
             this.board = board;
+            validator = new MoveValidator(troopMap, activePlayer);
         }
 
         
@@ -41,7 +44,7 @@ namespace GameServer.GameLogic
         {
             if (roundNumber == 0)
             {
-                return AddSpawnsForCurrentRoundAndReturnEvent();
+                return (TroopsSpawnedEvent)ToggleActivePlayerAndReturnEvents()[0];
             }
             throw new Exception("This game controller has already been initialized");
         }
@@ -56,14 +59,11 @@ namespace GameServer.GameLogic
             events.Add(troopsSpawnedEvent);
 
             HashSet<Troop> beginningTroops = troopMap.GetTroops(activePlayer.Opponent());
-            HashSet<Troop> endingTroops = troopMap.GetTroops(activePlayer);
-
             foreach (var troop in beginningTroops)
-                troop.OnTurnBegin();
-            foreach (var troop in endingTroops)
-                troop.OnTurnEnd();
+                troop.ResetMovePoints();
 
             activePlayer = activePlayer.Opponent();
+            validator.ToggleActivePlayer();
             SetInitialMovePointsLeft(activePlayer);
 
             foreach (var troop in aiControlled)
@@ -104,8 +104,6 @@ namespace GameServer.GameLogic
         {
             List<IServerEvent> events = new List<IServerEvent>();
 
-            // TODO: Only have one validator per controller
-            var validator = new MoveValidator(troopMap, activePlayer);
             if (validator.IsLegalMove(player, position, direction, board))
             {
                 TroopMovedEvent mainMove = MoveTroop(position, direction);
@@ -147,7 +145,7 @@ namespace GameServer.GameLogic
             movePointsLeft--;
 
             Troop encounter = troopMap.Get(troop.Position);
-            if (encounter != null)
+            if (encounter == null)
             {
                 troopMap.AdjustPosition(troop);
                 return new TroopMovedEvent(position, direction, battleResults);

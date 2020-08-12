@@ -1,18 +1,25 @@
-﻿
-
-using GameServer.Utils;
+﻿using GameServer.Utils;
+using System.Diagnostics;
 
 namespace GameServer.GameLogic
 {
     public class MoveValidator
     {
         private readonly TroopMap map;
-        private readonly PlayerId activePlayer;
+        private PlayerId activePlayer;
 
-        public MoveValidator(TroopMap map, PlayerId activePlayer)
+        public string Message { get; private set; } = null;
+
+
+        public MoveValidator(TroopMap map, PlayerId player0)
         {
             this.map = map;
-            this.activePlayer = activePlayer;
+            this.activePlayer = player0;
+        }
+
+        public void ToggleActivePlayer()
+        {
+            activePlayer = activePlayer.Opponent();
         }
 
         public bool IsLegalMove(PlayerId player, Vector2Int position, int direction, Board board)
@@ -26,13 +33,17 @@ namespace GameServer.GameLogic
                 TroopHasMovePoints(troop);
                 NotBlockedByFriendsOrBoard(troop, direction, board);
 
+                Message = "Move is valid.";
                 return true;
             }
-            catch (IllegalMoveException)
+            catch (IllegalMoveException ex)
             {
+                Message = ex.Message;
+                Trace.WriteLine(Message);
                 return false;
             }
         }
+
 
         private void IsPlayersTurn(PlayerId player)
         {
