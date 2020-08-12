@@ -36,7 +36,7 @@ namespace GameServer.GameLogic
             this.board = board;
         }
 
-
+        
         public TroopsSpawnedEvent InitializeAndReturnEvents()
         {
             if (roundNumber == 0)
@@ -104,7 +104,9 @@ namespace GameServer.GameLogic
         {
             List<IServerEvent> events = new List<IServerEvent>();
 
-            if (IsValidMove(player, position, direction, out string message))
+            // TODO: Only have one validator per controller
+            var validator = new MoveValidator(troopMap, activePlayer);
+            if (validator.IsLegalMove(player, position, direction, board))
             {
                 TroopMovedEvent mainMove = MoveTroop(position, direction);
                 events.Add(mainMove);
@@ -123,11 +125,8 @@ namespace GameServer.GameLogic
             }
             else
             {
-                // Handle an illegal move
-                // In future may send an illegal move event 
-                Console.WriteLine($"Illegal move: {message}");
+                // TODO: handle illegal move
             }
-
             return events;
         }
 
@@ -137,54 +136,6 @@ namespace GameServer.GameLogic
             bool blueLost = troopMap.GetTroops(PlayerId.Blue).Count == 0 && waves.maxBlueWave <= roundNumber;
 
             return redLost || blueLost;
-        }
-
-        private bool IsValidMove(PlayerId player, Vector2Int position, int direction, out string message)
-        {
-            message = "";
-
-            if (activePlayer != player)
-            {
-                message = "Attempting to make a move in oponent's turn!";
-                return false;
-            }
-
-            Troop troop = troopMap.Get(position);
-            if (troop == null)
-            {
-                message = "No troop at the specified hex!";
-                return false;
-            }
-
-            if (troop.Player != player)
-            {
-                message = "Attempting to move enemy troop!";
-                return false;
-            }
-
-            if (troop.MovePoints <= 0)
-            {
-                message = "Attempting to move a troop with no move points!";
-                return false;
-            }
-
-            Vector2Int targetPosition = troop.GetAdjacentHex(direction);
-            Troop encounter = troopMap.Get(targetPosition);
-            if (encounter != null && encounter.Player == player)
-            {
-                foreach (var cell in Hex.GetControllZone(troop.Position, troop.Orientation))
-                {
-                    encounter = troopMap.Get(targetPosition);
-                    if (!targetPosition.IsOutside(board)
-                        && (encounter != null || encounter.Player != player))
-                    {
-                        message = "Attempting to enter a cell with friendly troop!";
-                        return false;
-                    }
-                }
-            }
-
-            return true;
         }
 
         private TroopMovedEvent MoveTroop(Vector2Int position, int direction)
