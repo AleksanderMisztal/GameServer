@@ -1,8 +1,5 @@
 ﻿using GameServer.Utils;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace GameServer.GameLogic
 {
@@ -43,6 +40,25 @@ namespace GameServer.GameLogic
         public void Remove(Troop troop)
         {
             map.Remove(troop.StartingPosition);
+        }
+
+        // TODO: Change from "dfs" to iterative bfs
+        // TODO: Don't return cells outside the board
+        public Vector2Int GetEmptyCell(Vector2Int seedPosition)
+        {
+            if (Get(seedPosition) == null) return seedPosition;
+
+            Vector2Int[] neighbours = Hex.GetNeighbours(seedPosition);
+            Randomizer.Randomize(neighbours);
+
+            foreach (var position in neighbours)
+            {
+                if (Get(position) == null)
+                {
+                    return position;
+                }
+            }
+            return GetEmptyCell(neighbours[0]);
         }
     }
 }

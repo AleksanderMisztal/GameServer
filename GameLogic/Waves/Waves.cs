@@ -16,6 +16,19 @@ namespace GameServer.GameLogic
             this.maxBlueWave = maxBlueWave;
         }
 
+        public List<TroopTemplate> GetTroops(int round)
+        {
+            try
+            {
+                return troopsForRound[round];
+            }
+            catch (KeyNotFoundException)
+            {
+                return new List<TroopTemplate>();
+            }
+        }
+
+
         public static Waves Test()
         {
             TroopTemplate blueTroop = new TroopTemplate(PlayerId.Blue, 5, 2, 0);

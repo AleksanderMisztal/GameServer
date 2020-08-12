@@ -8,17 +8,13 @@ namespace GameServer.GameLogic
 {
     public class GameController
     {
-        private bool gameEnded = false;
-
         private PlayerId activePlayer = PlayerId.Red;
         private int roundNumber = 0;
-
-        private int blueScore = 0;
-        private int redScore = 0;
-
         private int movePointsLeft;
 
-        private readonly IBattleResolver battles;
+        private readonly Score score;
+
+        private readonly IBattleResolver battleResolver;
         private readonly Waves waves;
         private readonly Board board;
 
@@ -30,14 +26,14 @@ namespace GameServer.GameLogic
 
         public GameController(Waves waves, Board board)
         {
-            this.battles = new StandardBattles();
+            this.battleResolver = new StandardBattles();
             this.waves = waves;
             this.board = board;
         }
 
         public GameController(IBattleResolver battles, Board board, Waves waves)
         {
-            this.battles = battles;
+            this.battleResolver = battles;
             this.waves = waves;
             this.board = board;
         }
@@ -86,50 +82,22 @@ namespace GameServer.GameLogic
 
         private TroopsSpawnedEvent AddSpawnsForCurrentRoundAndReturnEvent()
         {
-            List<TroopTemplate> wave;
-            try
+            List<TroopTemplate> wave = waves.GetTroops(roundNumber);
+
+            foreach (var template in wave)
             {
-                wave = waves.troopsForRound[roundNumber];
+                template.position = troopMap.GetEmptyCell(template.position);
+                Troop troop = new Troop(template);
 
-                foreach (var template in wave)
-                {
-                    template.position = GetEmptyCell(template.position);
-                    Troop troop = new Troop(template);
+                troopMap.Add(troop);
 
-                    troopMap.Add(troop);
-
-                    if (troop.ControllingPlayer == PlayerId.Blue)
-                        blueTroops.Add(troop);
-                    else
-                        redTroops.Add(troop);
-                }
-            }
-            catch (KeyNotFoundException)
-            {
-                wave = new List<TroopTemplate>();
+                if (troop.ControllingPlayer == PlayerId.Blue)
+                    blueTroops.Add(troop);
+                else
+                    redTroops.Add(troop);
             }
 
             return new TroopsSpawnedEvent(wave);
-        }
-
-        // TODO: Change from "dfs" to iterative bfs
-        // TODO: Don't return cells outside the board
-        // TODO: Move to TroopMap
-        private Vector2Int GetEmptyCell(Vector2Int seedPosition)
-        {
-            if (troopMap.Get(seedPosition) == null) return seedPosition;
-
-            Vector2Int[] neighbours = Hex.GetNeighbours(seedPosition);
-            Randomizer.Randomize(neighbours);
-
-            foreach (var position in neighbours)
-            {
-                if (troopMap.Get(position) == null)
-                {
-                    return position;
-                }
-            }
-            return GetEmptyCell(neighbours[0]);
         }
 
         private void SetInitialMovePointsLeft(PlayerId player)
@@ -157,7 +125,7 @@ namespace GameServer.GameLogic
                     }
                     else return events;
                 }
-                GameEndedEvent gameEndEvent = new GameEndedEvent(redScore, blueScore);
+                GameEndedEvent gameEndEvent = new GameEndedEvent(score);
                 events.Add(gameEndEvent);
             }
             else
@@ -243,7 +211,7 @@ namespace GameServer.GameLogic
 
             BattleResult result = new BattleResult(true, true);
             if (encounter.ControllingPlayer != troop.ControllingPlayer)
-                result = battles.GetFightResult(troop, encounter);
+                result = battleResolver.GetFightResult(troop, encounter);
 
             battleResults.Add(result);
             if (result.AttackerDamaged) ApplyDamage(troop);
@@ -253,7 +221,7 @@ namespace GameServer.GameLogic
             
             while ((encounter = troopMap.Get(troop.Position)) != null && troop.Health > 0)
             {
-                result = battles.GetCollisionResult();
+                result = battleResolver.GetCollisionResult();
                 battleResults.Add(result);
                 if (result.AttackerDamaged) ApplyDamage(troop);
                 if (result.DefenderDamaged) ApplyDamage(encounter);
@@ -272,7 +240,7 @@ namespace GameServer.GameLogic
         private void ApplyDamage(Troop troop)
         {
             PlayerId opponent = troop.ControllingPlayer.Opponent();
-            IncrementScore(opponent);
+            score.Increment(opponent);
 
             if (troop.ControllingPlayer == activePlayer && troop.MovePoints > 0)
                 movePointsLeft--;
@@ -281,12 +249,6 @@ namespace GameServer.GameLogic
 
             if (troop.Health <= 0)
                 DestroyTroop(troop);
-        }
-
-        private void IncrementScore(PlayerId player)
-        {
-            if (player == PlayerId.Blue) blueScore++;
-            if (player == PlayerId.Red) redScore++;
         }
 
         private void DestroyTroop(Troop troop)
@@ -300,6 +262,7 @@ namespace GameServer.GameLogic
                 movePointsLeft -= troop.MovePoints;
         }
 
+        // TODO: Extract a TroopAI class
         private List<TroopMovedEvent> ControllWithAI(Troop troop)
         {
             Vector2Int target = board.GetCenter();

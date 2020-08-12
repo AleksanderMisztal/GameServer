@@ -1,5 +1,4 @@
 ﻿using GameServer.Utils;
-using System.Diagnostics;
 
 namespace GameServer.GameLogic
 {
@@ -56,9 +55,7 @@ namespace GameServer.GameLogic
             Health--;
             InitialMovePoints--;
             if (MovePoints > 0)
-            {
                 MovePoints--;
-            }
         }
 
         public bool InControlZone(Vector2Int cell)
