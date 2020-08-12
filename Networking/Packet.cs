@@ -195,7 +195,7 @@ namespace GameServer.Networking
         }
         /// <summary>Adds a Board to the packet.</summary>
         /// <param name="_value">The Board to add.</param>
-        public void Write(BoardParams _value)
+        public void Write(Board _value)
         {
             Write(_value.xMin);
             Write(_value.xMax);

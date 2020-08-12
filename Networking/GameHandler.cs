@@ -3,67 +3,10 @@ using System.Collections.Generic;
 using GameServer.Utils;
 using GameServer.GameLogic;
 using System.Threading.Tasks;
+using GameServer.GameLogic.ServerEvents;
 
 namespace GameServer.Networking
 {
-    public class Game
-    {
-        public GameController Controller { get; }
-        public int ClientRed { get; }
-        public int ClientBlue { get; }
-
-        public int StartTime { get; }
-        public int BlueTime { get; private set; } = 60;
-        public int RedTime { get; private set; } = 60;
-        public int LastMoveTime { get; set; }
-        public PlayerId LastMoving { get; set; } = PlayerId.Red;
-
-        public async void OnMove(int timeStamp)
-        {
-            int elapsed = timeStamp - LastMoveTime;
-            LastMoveTime = timeStamp;
-            int timeLeft = LastMoving == PlayerId.Red ? BlueTime -= elapsed : RedTime -= elapsed;
-            LastMoving = LastMoving == PlayerId.Red ? PlayerId.Blue : PlayerId.Red;
-
-            await Task.Delay(timeLeft + 1);
-            if (!Controller.gameEnded)
-            {
-                if (LastMoving == PlayerId.Red)
-                {
-                    int now = (int)DateTime.Now.TimeOfDay.TotalSeconds;
-                    if (now - LastMoveTime > BlueTime)
-                    {
-                        await ServerSend.LostOnTime(ClientBlue, PlayerId.Blue);
-                        await ServerSend.LostOnTime(ClientRed, PlayerId.Blue);
-                    }
-                }
-                if (LastMoving == PlayerId.Blue)
-                {
-                    int now = (int)DateTime.Now.TimeOfDay.TotalSeconds;
-                    if (now - LastMoveTime > RedTime)
-                    {
-                        await ServerSend.LostOnTime(ClientBlue, PlayerId.Red);
-                        await ServerSend.LostOnTime(ClientRed, PlayerId.Red);
-                    }
-                }
-            }
-        }
-
-        public Game(GameController controller, int clientRed, int clientBlue, int startTime)
-        {
-            Controller = controller;
-            ClientRed = clientRed;
-            ClientBlue = clientBlue;
-            StartTime = startTime;
-            LastMoveTime = startTime;
-        }
-
-        public override string ToString()
-        {
-            return $"(GameId : {Controller.gameId}, Blue : {ClientBlue}, Red : {ClientRed})";
-        }
-    }
-
     public static class GameHandler
     {
         public static readonly Dictionary<int, Game> games = new Dictionary<int, Game>();
@@ -106,9 +49,11 @@ namespace GameServer.Networking
                 playingBlue = waitingClient;
             }
 
-            int startTime = (int)DateTime.Now.TimeOfDay.TotalSeconds;
-            Game game = new Game(new GameController(nextGameId), playingRed, playingBlue, startTime);
-            BoardParams board = game.Controller.Board;
+            Waves waves = Waves.Basic();
+            Board board = Board.standard;
+
+            Game game = new Game(nextGameId++, new GameController(waves, board), playingRed, playingBlue);
+
             games.Add(nextGameId, game);
 
             clientToGame[playingRed] = game;
@@ -117,30 +62,44 @@ namespace GameServer.Networking
             clientToColor[playingBlue] = PlayerId.Blue;
             clientToColor[playingRed] = PlayerId.Red;
 
-            await game.Controller.Initialize();
+            //TODO: should send game started
 
-            await ServerSend.GameJoined(playingBlue, clientToUsername[playingRed], PlayerId.Blue, board);
-            await ServerSend.GameJoined(playingRed, clientToUsername[playingBlue], PlayerId.Red, board);
+            var redGameJoined = new GameJoinedEvent(clientToUsername[playingBlue], PlayerId.Red, board);
+            var blueGameJoined = new GameJoinedEvent(clientToUsername[playingRed], PlayerId.Blue, board);
 
-            nextGameId++;
+            await ServerSend.SendEvent(playingRed, redGameJoined);
+            await ServerSend.SendEvent(playingBlue, blueGameJoined);
+
+            var events = game.Controller.InitializeAndReturnEvents();
+
+            foreach (var ev in events)
+            {
+                await ServerSend.SendEvent(playingRed, ev);
+                await ServerSend.SendEvent(playingBlue, ev);
+            }
         }
 
         public static async Task MoveTroop(int client, Vector2Int position, int direction)
         {
-            if (!clientToGame.TryGetValue(client, out Game game))
+            if (clientToGame.TryGetValue(client, out Game game))
             {
-                return;
+                PlayerId color = clientToColor[client];
+                try
+                {
+                    List<IServerEvent> events = game.Controller.ProcessMoveRequest(color, position, direction);
+                    foreach (var ev in events)
+                    {
+                        await ServerSend.SendEvent(game.ClientBlue, ev);
+                        await ServerSend.SendEvent(game.ClientRed, ev);
+                    }
+                }
+                catch (IllegalMoveException ex)
+                {
+                    Console.WriteLine($"Illegal move: {ex.Message}");
+                }
             }
 
-            PlayerId color = clientToColor[client];
-            try
-            {
-                await game.Controller.MoveTroop(color, position, direction);
-            }
-            catch (IllegalMoveException ex)
-            {
-                Console.WriteLine($"Illegal move: {ex.Message}");
-            }
+            
         }
 
         public static async Task SendMessage(int client, string message)
@@ -152,11 +111,11 @@ namespace GameServer.Networking
             }
             catch 
             {
-                await ServerSend.OpponentDisconnected(client);
+                await ServerSend.SendEvent(client, new OpponentDisconnectedEvent());
                 return;
             }
             int oponent = game.ClientBlue ^ game.ClientRed ^ client;
-            await ServerSend.MessageSent(oponent, message);
+            await ServerSend.SendEvent(oponent, new MessageSentEvent(message));
         }
 
 
@@ -168,19 +127,16 @@ namespace GameServer.Networking
                 return;
             }
 
-            int timeStamp = (int)DateTime.Now.TimeOfDay.TotalSeconds - game.StartTime;
-            game.OnMove(timeStamp);
-
-            await ServerSend.TroopsSpawned(game.ClientBlue, timeStamp, templates);
-            await ServerSend.TroopsSpawned(game.ClientRed, timeStamp, templates);
+            await ServerSend.SendEvent(game.ClientRed, new TroopsSpawnedEvent(templates));
+            await ServerSend.SendEvent(game.ClientBlue, new TroopsSpawnedEvent(templates));
         }
 
         public static async Task TroopMoved(int gameId, Vector2Int position, int direction, List<BattleResult> battleResults)
         {
             Game game = games[gameId];
 
-            await ServerSend.TroopMoved(game.ClientBlue, position, direction, battleResults);
-            await ServerSend.TroopMoved(game.ClientRed, position, direction, battleResults);
+            await ServerSend.SendEvent(game.ClientBlue, new TroopMovedEvent(position, direction, battleResults));
+            await ServerSend.SendEvent(game.ClientRed, new TroopMovedEvent(position, direction, battleResults));
         }
 
         public static async Task GameEnded(int gameId, int redScore, int blueScore)
@@ -191,8 +147,8 @@ namespace GameServer.Networking
             clientToGame.Remove(game.ClientBlue);
             clientToGame.Remove(game.ClientRed);
 
-            await ServerSend.GameEnded(game.ClientBlue, redScore, blueScore);
-            await ServerSend.GameEnded(game.ClientRed, redScore, blueScore);
+            await ServerSend.SendEvent(game.ClientRed, new GameEndedEvent(redScore, blueScore));
+            await ServerSend.SendEvent(game.ClientBlue, new GameEndedEvent(redScore, blueScore));
         }
 
         // Internal
@@ -208,9 +164,9 @@ namespace GameServer.Networking
 
                 clientToGame.Remove(clientId);
                 clientToGame.Remove(oponent);
-                games.Remove(game.Controller.gameId);
+                games.Remove(game.GameId);
 
-                await ServerSend.OpponentDisconnected(oponent);
+                await ServerSend.SendEvent(oponent, new OpponentDisconnectedEvent());
             }
         }
     }

@@ -1,15 +1,14 @@
 ﻿using System.Linq;
 using System.Collections.Generic;
 using GameServer.Utils;
-using GameServer.Networking;
-using System.Threading.Tasks;
+using GameServer.GameLogic.ServerEvents;
+using System;
 
 namespace GameServer.GameLogic
 {
     public class GameController
     {
-        public readonly int gameId;
-        public bool gameEnded = false;
+        private bool gameEnded = false;
 
         private PlayerId activePlayer = PlayerId.Red;
         private int roundNumber = 0;
@@ -20,94 +19,153 @@ namespace GameServer.GameLogic
         private int redScore = 0;
 
         private int movePointsLeft;
-        private readonly Dictionary<int, List<TroopTemplate>> waves;
-        public BoardParams Board { get; private set; }
+
+        private readonly IBattles battles;
+        private readonly Waves waves;
+        private readonly Board board;
 
         private readonly HashSet<Troop> blueTroops = new HashSet<Troop>();
         private readonly HashSet<Troop> redTroops = new HashSet<Troop>();
         private readonly Dictionary<Vector2Int, Troop> troopAtPosition = new Dictionary<Vector2Int, Troop>();
         private readonly HashSet<Troop> aiControlled = new HashSet<Troop>();
 
-        private PlayerId Oponent => activePlayer == PlayerId.Red ? PlayerId.Blue : PlayerId.Red;
 
-
-        // Public interface
-        public GameController(int gameId)
+        public GameController(Waves waves, Board board)
         {
-            this.gameId = gameId;
-            waves = TroopSpawns.BasicPlanes(out maxBlueWave, out maxRedWave);
-            Board = BoardParams.Standard;
+            this.battles = new StandardBattles();
+            this.waves = waves;
+            this.board = board;
         }
 
-        public async Task Initialize()
+        public GameController(IBattles battles, Board board, Waves waves)
         {
-            await ToggleActivePlayer();
+            this.battles = battles;
+            this.waves = waves;
+            this.board = board;
         }
 
-        public async Task MoveTroop(PlayerId player, Vector2Int position, int direction)
+
+        public List<IServerEvent> InitializeAndReturnEvents()
         {
-            if (!IsValidMove(player, position, direction, out string message))
+            var events = ToggleActivePlayerAndReturnEvents();
+            return events;
+        }
+
+        private List<IServerEvent> ToggleActivePlayerAndReturnEvents()
+        {
+            roundNumber++;
+
+            List<IServerEvent> events = new List<IServerEvent>();
+
+            var troopsSpawnedEvent = AddSpawnsForCurrentRoundAndReturnEvent();
+            events.Add(troopsSpawnedEvent);
+
+            HashSet<Troop> beginningTroops = activePlayer == PlayerId.Blue ? redTroops : blueTroops;
+            HashSet<Troop> endingTroops = activePlayer == PlayerId.Blue ? blueTroops : redTroops;
+
+            foreach (var troop in beginningTroops)
+                troop.OnTurnBegin();
+            foreach (var troop in endingTroops)
+                troop.OnTurnEnd();
+
+            activePlayer = activePlayer.Opponent();
+            SetInitialMovePointsLeft(activePlayer);
+
+            foreach (var troop in aiControlled)
             {
-                throw new IllegalMoveException(message);
-            }
-
-            Troop troop = troopAtPosition[position];
-            List<BattleResult> battleResults = new List<BattleResult>();
-
-            troop.MoveInDirection(direction);
-            movePointsLeft--;
-
-            if (!troopAtPosition.TryGetValue(troop.Position, out Troop encounter))
-            {
-                await GameHandler.TroopMoved(gameId, position, direction, battleResults);
-                await AdjustTroopPosition(troop);
-                if (movePointsLeft <= 0)
+                if (troop.ControllingPlayer == activePlayer)
                 {
-                    await ToggleActivePlayer();
+                    var moveEvents = ControllWithAI(troop);
+                    events.AddRange(moveEvents);
                 }
-                return;
             }
 
-            BattleResult result = new BattleResult(true, true);
-            if (encounter.ControllingPlayer != troop.ControllingPlayer)
-                result = Battles.GetFightResult(troop, encounter);
+            return events;
+        }
 
-            battleResults.Add(result);
-            if (result.AttackerDamaged) ApplyDamage(troop);
-            if (result.DefenderDamaged) ApplyDamage(encounter);
-
-            troop.JumpForward();
-            
-            while (troopAtPosition.TryGetValue(troop.Position, out encounter) && troop.Health > 0)
+        private TroopsSpawnedEvent AddSpawnsForCurrentRoundAndReturnEvent()
+        {
+            List<TroopTemplate> wave;
+            try
             {
-                result = Battles.GetCollisionResult();
-                battleResults.Add(result);
-                if (result.AttackerDamaged) ApplyDamage(troop);
-                if (result.DefenderDamaged) ApplyDamage(encounter);
+                wave = waves.troopsForRound[roundNumber];
 
-                troop.JumpForward();
+                foreach (var template in wave)
+                {
+                    template.position = GetEmptyCell(template.position);
+                    Troop troop = new Troop(template);
+
+                    troopAtPosition.Add(troop.Position, troop);
+
+                    if (troop.ControllingPlayer == PlayerId.Blue)
+                        blueTroops.Add(troop);
+                    else
+                        redTroops.Add(troop);
+                }
             }
-
-            await GameHandler.TroopMoved(gameId, position, direction, battleResults);
-
-            if (troop.Health > 0) 
-            { 
-                await AdjustTroopPosition(troop);
-            }
-
-
-            if (gameEnded)
+            catch (KeyNotFoundException)
             {
-                await GameHandler.GameEnded(gameId, redScore, blueScore);
+                wave = new List<TroopTemplate>();
             }
-            else if (movePointsLeft <= 0)
+
+            return new TroopsSpawnedEvent(wave);
+        }
+
+        //TODO: Change from dfs to iterative bfs
+        private Vector2Int GetEmptyCell(Vector2Int seedPosition)
+        {
+            if (!troopAtPosition.TryGetValue(seedPosition, out _)) return seedPosition;
+
+            Vector2Int[] neighbours = Hex.GetNeighbours(seedPosition);
+            Randomizer.Randomize(neighbours);
+
+            foreach (var position in neighbours)
             {
-                await ToggleActivePlayer();
+                if (!troopAtPosition.TryGetValue(position, out _))
+                {
+                    return position;
+                }
             }
+            return GetEmptyCell(neighbours[0]);
+        }
+
+        private void SetInitialMovePointsLeft(PlayerId player)
+        {
+            HashSet<Troop> troops = player == PlayerId.Blue ? blueTroops : redTroops;
+            movePointsLeft = troops.Aggregate(0, (acc, t) => acc + t.InitialMovePoints);
         }
 
 
-        // Private functions
+        public List<IServerEvent> ProcessMoveRequest(PlayerId player, Vector2Int position, int direction)
+        {
+            List<IServerEvent> events = new List<IServerEvent>();
+
+            if (IsValidMove(player, position, direction, out string message))
+            {
+                TroopMovedEvent mainMove = MoveTroop(position, direction);
+                events.Add(mainMove);
+
+                if (gameEnded)
+                {
+                    GameEndedEvent gameEndEvent = new GameEndedEvent(redScore, blueScore);
+                    events.Add(gameEndEvent);
+                }
+                else while (movePointsLeft <= 0)
+                {
+                    var turnEndEvents = ToggleActivePlayerAndReturnEvents();
+                    events.AddRange(turnEndEvents);
+                }
+            }
+            else
+            {
+                // Handle an illegal move
+                // In future may send an illegal move event 
+                Console.WriteLine($"Illegal move: {message}");
+            }
+
+            return events;
+        }
+
         private bool IsValidMove(PlayerId player, Vector2Int position, int direction, out string message)
         {
             message = "";
@@ -141,7 +199,7 @@ namespace GameServer.GameLogic
             {
                 foreach (var cell in Hex.GetControllZone(troop.Position, troop.Orientation))
                 {
-                    if (!targetPosition.IsOutside(Board) 
+                    if (!targetPosition.IsOutside(board) 
                         && (!troopAtPosition.TryGetValue(targetPosition, out encounter) 
                             || encounter.ControllingPlayer != player))
                     {
@@ -154,20 +212,68 @@ namespace GameServer.GameLogic
             return true;
         }
 
+        private TroopMovedEvent MoveTroop(Vector2Int position, int direction)
+        {
+            Troop troop = troopAtPosition[position];
+            List<BattleResult> battleResults = new List<BattleResult>();
+
+            troop.MoveInDirection(direction);
+            movePointsLeft--;
+
+            if (!troopAtPosition.TryGetValue(troop.Position, out Troop encounter))
+            {
+                AdjustTroopPosition(troop);
+                return new TroopMovedEvent(position, direction, battleResults);
+            }
+
+            BattleResult result = new BattleResult(true, true);
+            if (encounter.ControllingPlayer != troop.ControllingPlayer)
+                result = battles.GetFightResult(troop, encounter);
+
+            battleResults.Add(result);
+            if (result.AttackerDamaged) ApplyDamage(troop);
+            if (result.DefenderDamaged) ApplyDamage(encounter);
+
+            troop.JumpForward();
+            
+            while (troopAtPosition.TryGetValue(troop.Position, out encounter) && troop.Health > 0)
+            {
+                result = battles.GetCollisionResult();
+                battleResults.Add(result);
+                if (result.AttackerDamaged) ApplyDamage(troop);
+                if (result.DefenderDamaged) ApplyDamage(encounter);
+
+                troop.JumpForward();
+            }
+
+            if (troop.Health > 0) 
+            { 
+                AdjustTroopPosition(troop);
+            }
+
+            return new TroopMovedEvent(position, direction, battleResults);
+        }
+
+        private void AdjustTroopPosition(Troop troop)
+        {
+            troopAtPosition.Remove(troop.StartingPosition);
+            troopAtPosition.Add(troop.Position, troop);
+
+            troop.StartingPosition = troop.Position;
+        }
+
         private void ApplyDamage(Troop troop)
         {
-            PlayerId oponent = troop.ControllingPlayer == PlayerId.Blue ? PlayerId.Red : PlayerId.Blue;
-            IncrementScore(oponent);
+            PlayerId opponent = troop.ControllingPlayer.Opponent();
+            IncrementScore(opponent);
 
             if (troop.ControllingPlayer == activePlayer && troop.MovePoints > 0)
-            {
                 movePointsLeft--;
-            }
+
             troop.ApplyDamage();
+
             if (troop.Health <= 0)
-            {
                 DestroyTroop(troop);
-            }
         }
 
         private void IncrementScore(PlayerId player)
@@ -185,32 +291,17 @@ namespace GameServer.GameLogic
             friendlyTroops.Remove(troop);
 
             if (troop.ControllingPlayer == activePlayer)
-            {
                 movePointsLeft -= troop.MovePoints;
-            }
+
             if (friendlyTroops.Count == 0 && roundNumber >= maxWave)
-            {
                 gameEnded = true;
-            }
         }
 
-        private async Task AdjustTroopPosition(Troop troop)
+        private List<TroopMovedEvent> ControllWithAI(Troop troop)
         {
-            troopAtPosition.Remove(troop.StartingPosition);
-            troopAtPosition.Add(troop.Position, troop);
+            Vector2Int target = board.GetCenter();
 
-            troop.StartingPosition = troop.Position;
-
-            if (troop.Position.IsOutside(Board))
-            {
-                aiControlled.Add(troop);
-                await ControllWithAI(troop);
-            }
-        }
-
-        private async Task ControllWithAI(Troop troop)
-        {
-            Vector2Int target = new Vector2Int((Board.xMax + Board.xMin) / 2, (Board.yMax + Board.yMin) / 2);
+            List<TroopMovedEvent> events = new List<TroopMovedEvent>();
 
             while (troop.MovePoints > 0)
             {
@@ -228,98 +319,17 @@ namespace GameServer.GameLogic
                         minDir = dir;
                     }
                 }
-                await MoveTroop(activePlayer, troop.Position, minDir);
 
-                if (!troop.Position.IsOutside(Board))
+                var troopMovedEvent = MoveTroop(troop.Position, minDir);
+                events.Add(troopMovedEvent);
+
+                if (!troop.Position.IsOutside(board))
                 {
-                    return;
+                    aiControlled.Remove(troop);
+                    break;
                 }
             }
-        }
-
-        private Vector2Int GetEmptyCell(Vector2Int seedPosition)
-        {
-            if (!troopAtPosition.TryGetValue(seedPosition, out _)) return seedPosition;
-
-            Vector2Int[] neighbours = Hex.GetNeighbours(seedPosition);
-            Randomizer.Randomize(neighbours);
-
-            foreach (var position in neighbours)
-            {
-                if (!troopAtPosition.TryGetValue(position, out _))
-                {
-                    return position;
-                }
-            }
-            return GetEmptyCell(neighbours[0]);
-        }
-
-        private async Task ToggleActivePlayer()
-        {
-            roundNumber++;
-            await SpawnNextWave();
-
-            HashSet<Troop> beginningTroops = activePlayer == PlayerId.Blue ? redTroops : blueTroops;
-            HashSet<Troop> endingTroops = activePlayer == PlayerId.Blue ? blueTroops : redTroops;
-
-            foreach(var troop in beginningTroops)
-            {
-                troop.OnTurnBegin();
-            }
-            foreach (var troop in endingTroops)
-            {
-                troop.OnTurnEnd();
-            }
-
-            activePlayer = Oponent;
-            SetInitialMovePointsLeft(activePlayer);
-
-            aiControlled.RemoveWhere(t => !t.Position.IsOutside(Board));
-            foreach (var troop in aiControlled)
-            {
-                if (troop.ControllingPlayer == activePlayer)
-                {
-                    await ControllWithAI(troop);
-                }
-            }
-
-            if (movePointsLeft == 0)
-            {
-                await ToggleActivePlayer();
-            }
-        }
-
-        private async Task SpawnNextWave()
-        {
-            if (!waves.TryGetValue(roundNumber, out List<TroopTemplate> wave))
-            {
-                await GameHandler.TroopsSpawned(gameId, new List<TroopTemplate>());
-                return;
-            }
-
-            foreach (var template in wave)
-            {
-                template.position = GetEmptyCell(template.position);
-                Troop troop = new Troop(template);
-
-                troopAtPosition.Add(troop.Position, troop);
-
-                if (troop.ControllingPlayer == PlayerId.Blue)
-                {
-                    blueTroops.Add(troop);
-                }
-                else
-                {
-                    redTroops.Add(troop);
-                }
-            }
-            await GameHandler.TroopsSpawned(gameId, wave);
-        }
-
-        private void SetInitialMovePointsLeft(PlayerId player)
-        {
-            HashSet<Troop> troops = player == PlayerId.Blue ? blueTroops : redTroops;
-            movePointsLeft = troops.Aggregate(0, (acc, t) => acc + t.InitialMovePoints);
+            return events;
         }
     }
 }

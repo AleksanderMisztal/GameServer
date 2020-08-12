@@ -26,5 +26,17 @@ namespace GameServer.GameLogic
             template.position = new Vector2Int(x, y);
             return template;
         }
+
+        public TroopTemplate Deploy(Vector2Int position)
+        {
+            TroopTemplate template = new TroopTemplate(controllingPlayer, movePoints, health, orientation);
+            template.position = position;
+            return template;
+        }
+
+        public override string ToString()
+        {
+            return $"cp: {controllingPlayer}, mp: {movePoints}, h: {health}, o: {orientation}, p: {position}";
+        }
     }
 }

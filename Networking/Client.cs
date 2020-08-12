@@ -5,6 +5,7 @@ using System.Net.WebSockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using GameServer.GameLogic.ServerEvents;
 using GameServer.Utils;
 
 namespace GameServer.Networking
@@ -35,7 +36,7 @@ namespace GameServer.Networking
             {
                 this.socket = socket;
                 isConnected = true;
-                await ServerSend.Welcome(id, "Welcome to the server!");
+                await ServerSend.SendEvent(id, new WelcomeEvent("Welcome to the server!"));
                 while (isConnected)
                 {
                     await BeginReceive();

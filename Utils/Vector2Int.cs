@@ -22,7 +22,7 @@ namespace GameServer.Utils
             Y = 0;
         }
 
-        public bool IsOutside(BoardParams b)
+        public bool IsOutside(Board b)
         {
             return X < b.xMin || X > b.xMax || Y < b.yMin || Y > b.yMax;
         }
