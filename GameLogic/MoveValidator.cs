@@ -79,7 +79,7 @@ namespace GameServer.GameLogic
                 foreach (var cell in Hex.GetControllZone(troop.Position, troop.Orientation))
                 {
                     encounter = map.Get(targetPosition);
-                    if (!targetPosition.IsOutside(board)
+                    if (!board.IsOutside(targetPosition)
                         && (encounter != null || encounter.Player != troop.Player))
                     {
                         throw new IllegalMoveException("Attempting to enter a cell with friendly troop!");

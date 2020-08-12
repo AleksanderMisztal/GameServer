@@ -190,6 +190,8 @@ namespace GameServer.GameLogic
 
         private List<TroopMovedEvent> ExecuteAiMoves()
         {
+            aiControlled.RemoveWhere(t => !board.IsOutside(t.Position));
+
             List<TroopMovedEvent> events = new List<TroopMovedEvent>();
             foreach (var troop in aiControlled)
             {
@@ -229,7 +231,7 @@ namespace GameServer.GameLogic
                 var troopMovedEvent = MoveTroop(troop.Position, minDir);
                 events.Add(troopMovedEvent);
 
-                if (!troop.Position.IsOutside(board))
+                if (!board.IsOutside(troop.Position))
                 {
                     aiControlled.Remove(troop);
                     break;

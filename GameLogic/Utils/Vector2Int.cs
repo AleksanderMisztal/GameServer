@@ -22,11 +22,6 @@ namespace GameServer.Utils
             Y = 0;
         }
 
-        public bool IsOutside(Board b)
-        {
-            return X < b.xMin || X > b.xMax || Y < b.yMin || Y > b.yMax;
-        }
-
         public override int GetHashCode()
         {
             return 1000 * (X + 100) + Y + 100;

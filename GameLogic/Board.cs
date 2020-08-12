@@ -25,6 +25,11 @@ namespace GameServer.GameLogic
             return new Vector2Int(x, y);
         }
 
+        public bool IsOutside(Vector2Int p)
+        {
+            return p.X < xMin || p.X > xMax || p.Y < yMin || p.Y > yMax;
+        }
+
         public static readonly Board standard = new Board(0, 20, 0, 12);
         public static readonly Board test = new Board(0, 8, 0, 5);
     }
