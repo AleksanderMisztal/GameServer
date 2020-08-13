@@ -2,7 +2,7 @@
 
 namespace GameServer.GameLogic.ServerEvents
 {
-    public class GameEndedEvent : IServerEvent
+    public class GameEndedEvent : IGameEvent
     {
         private readonly Score score;
 

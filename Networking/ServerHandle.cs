@@ -8,19 +8,14 @@ namespace GameServer.Networking
     {
         public static async Task JoinLobby(int fromClient, Packet packet)
         {
-            int clientIdCheck = packet.ReadInt();
             string username = packet.ReadString();
-
             Console.WriteLine($"Client with id {fromClient} joins with username {username}.");
-
             GameHandler.AddToLobby(fromClient, username);
         }
 
         public static async Task JoinGame(int fromClient, Packet packet)
         {
             Console.WriteLine($"Client with id {fromClient} is being sent to game");
-            int oponentId = packet.ReadInt();
-
             await GameHandler.SendToGame(fromClient);
         }
 

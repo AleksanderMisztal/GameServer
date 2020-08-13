@@ -4,7 +4,7 @@ using GameServer.Utils;
 
 namespace GameServer.GameLogic.ServerEvents
 {
-    public class TroopMovedEvent : IServerEvent
+    public class TroopMovedEvent : IGameEvent
     {
         private Vector2Int position;
         private int direction;

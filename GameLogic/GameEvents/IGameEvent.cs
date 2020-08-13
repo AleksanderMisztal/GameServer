@@ -2,7 +2,7 @@
 
 namespace GameServer.GameLogic.ServerEvents
 {
-    public interface IServerEvent
+    public interface IGameEvent
     {
         public Packet GetPacket();
         public string GetString();

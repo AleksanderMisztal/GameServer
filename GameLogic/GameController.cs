@@ -50,10 +50,10 @@ namespace GameServer.GameLogic
             throw new Exception("This game controller has already been initialized");
         }
 
-        private List<IServerEvent> ToggleActivePlayerAndReturnEvents()
+        private List<IGameEvent> ToggleActivePlayerAndReturnEvents()
         {
             roundNumber++;
-            List<IServerEvent> events = new List<IServerEvent>();
+            List<IGameEvent> events = new List<IGameEvent>();
 
             var troopsSpawnedEvent = AddSpawnsForCurrentRoundAndReturnEvent();
             events.Add(troopsSpawnedEvent);
@@ -91,9 +91,9 @@ namespace GameServer.GameLogic
         }
 
 
-        public List<IServerEvent> ProcessMove(PlayerSide player, Vector2Int position, int direction)
+        public List<IGameEvent> ProcessMove(PlayerSide player, Vector2Int position, int direction)
         {
-            List<IServerEvent> events = new List<IServerEvent>();
+            List<IGameEvent> events = new List<IGameEvent>();
 
             if (validator.IsLegalMove(player, position, direction, board))
             {

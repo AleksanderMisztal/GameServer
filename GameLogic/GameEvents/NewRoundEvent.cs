@@ -4,7 +4,7 @@ using System.Text;
 
 namespace GameServer.GameLogic.ServerEvents
 {
-    public class NewRoundEvent : IServerEvent
+    public class NewRoundEvent : IGameEvent
     {
         private List<Troop> troops;
 

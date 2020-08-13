@@ -48,9 +48,8 @@ namespace GameServer.Networking
             await client.wsClient.Connect(socket);
         }
 
-        public static async Task SendEvent(int toClient, IServerEvent ev)
+        public static async Task SendPacket(int toClient, Packet packet)
         {
-            using var packet = ev.GetPacket();
             try
             {
                 await clients[toClient].wsClient.SendData(packet);

@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using GameServer.Utils;
 using GameServer.GameLogic;
 using System.Threading.Tasks;
@@ -10,78 +9,48 @@ namespace GameServer.Networking
     public static class GameHandler
     {
         private static readonly Dictionary<int, Game> clientToGame = new Dictionary<int, Game>();
-        private static readonly Dictionary<int, PlayerSide> clientToColor = new Dictionary<int, PlayerSide>();
-        private static readonly Dictionary<int, string> clientToUsername = new Dictionary<int, string>();
 
         private static bool someoneWaiting = false;
-        private static int waitingClient;
+        private static User waitingClient;
 
 
-        public static void AddToLobby(int client, string username)
+        public static async Task SendToGame(int client, string username)
         {
-            clientToUsername[client] = username;
-        }
-
-        public static async Task SendToGame(int client)
-        {
-            if (!someoneWaiting)
+            User newClient = new User(client, username);
+            if (someoneWaiting)
             {
-                someoneWaiting = true;
-                waitingClient = client;
-                return;
-            }
-
-            someoneWaiting = false;
-
-            int playingRed;
-            int playingBlue;
-
-            if (new Random().Next(2) == 0)
-            {
-                playingRed = waitingClient;
-                playingBlue = client;
+                someoneWaiting = false;
+                Randomizer.RandomlyAssign(newClient, waitingClient, out User playingRed, out User playingBlue);
+                await InitializeNewGame(playingRed, playingBlue);
             }
             else
             {
-                playingRed = client;
-                playingBlue = waitingClient;
+                someoneWaiting = true;
+                waitingClient = newClient;
             }
+        }
 
+        private static async Task InitializeNewGame(User playingRed, User playingBlue)
+        {
             Waves waves = Waves.Basic();
             Board board = Board.standard;
-
             Game game = new Game(new GameController(waves, board), playingRed, playingBlue);
 
+            clientToGame[playingRed.id] = game;
+            clientToGame[playingBlue.id] = game;
 
-            clientToGame[playingRed] = game;
-            clientToGame[playingBlue] = game;
-
-            clientToColor[playingBlue] = PlayerSide.Blue;
-            clientToColor[playingRed] = PlayerSide.Red;
-
-
-            var redGameJoined = new GameJoinedEvent(clientToUsername[playingBlue], PlayerSide.Red, board);
-            var blueGameJoined = new GameJoinedEvent(clientToUsername[playingRed], PlayerSide.Blue, board);
-
-            await Server.SendEvent(playingRed, redGameJoined);
-            await Server.SendEvent(playingBlue, blueGameJoined);
-
-            var ev = game.Controller.InitializeAndReturnEvent();
-
-            await Server.SendEvent(playingRed, ev);
-            await Server.SendEvent(playingBlue, ev);
+            await game.Initialize(board);
         }
 
         public static async Task MoveTroop(int client, Vector2Int position, int direction)
         {
             if (clientToGame.TryGetValue(client, out Game game))
             {
-                PlayerSide color = clientToColor[client];
-                List<IServerEvent> events = game.Controller.ProcessMove(color, position, direction);
+                List<IGameEvent> events = game.MakeMove(client, position, direction);
                 foreach (var ev in events)
                 {
-                    await Server.SendEvent(game.ClientBlue, ev);
-                    await Server.SendEvent(game.ClientRed, ev);
+                    await ServerSend.GameEvent(game.blueUser.id, ev);
+                    await ServerSend.GameEvent(game.redUser.id, ev);
                 }
             }
         }
@@ -90,28 +59,28 @@ namespace GameServer.Networking
         {
             if (clientToGame.TryGetValue(client, out Game game))
             {
-                int oponent = game.ClientBlue ^ game.ClientRed ^ client;
-                await Server.SendEvent(oponent, new MessageSentEvent(message));
+                int oponent = game.blueUser.id ^ game.redUser.id ^ client;
+                await ServerSend.MessageSent(oponent, message);
             }
             else
             {
-                await Server.SendEvent(client, new OpponentDisconnectedEvent());
+                await ServerSend.OpponentDisconnected(client);
             }
         }
 
         public static async Task ClientDisconnected(int clientId)
         {
-            if (someoneWaiting && clientId == waitingClient)
+            if (someoneWaiting && clientId == waitingClient.id)
                 someoneWaiting = false;
 
             if (clientToGame.TryGetValue(clientId, out Game game))
             {
-                int oponent = clientId ^ game.ClientBlue ^ game.ClientRed;
+                int oponent = clientId ^ game.blueUser.id ^ game.redUser.id;
 
                 clientToGame.Remove(clientId);
                 clientToGame.Remove(oponent);
 
-                await Server.SendEvent(oponent, new OpponentDisconnectedEvent());
+                await ServerSend.OpponentDisconnected(oponent);
             }
         }
     }
