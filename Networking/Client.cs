@@ -36,7 +36,7 @@ namespace GameServer.Networking
             {
                 this.socket = socket;
                 isConnected = true;
-                await ServerSend.SendEvent(id, new WelcomeEvent("Welcome to the server!"));
+                await Server.SendEvent(id, new WelcomeEvent("Welcome to the server!"));
                 while (isConnected)
                 {
                     await BeginReceive();
