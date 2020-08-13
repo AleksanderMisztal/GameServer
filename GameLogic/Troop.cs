@@ -9,45 +9,49 @@ namespace GameServer.GameLogic
         public int InitialMovePoints { get; private set; }
         public int MovePoints { get; private set; }
 
-        public Vector2Int Position { get; private set; }
+        public Vector2Int Position { get; set; }
         public Vector2Int StartingPosition { get; set; }
         public int Orientation { get; private set; }
 
         public int Health { get; private set; }
 
 
-        public Troop(TroopTemplate template)
-        {
-            Player = template.player;
-            InitialMovePoints = template.movePoints;
-            Health = template.health;
-            Orientation = template.orientation;
+        //public Troop(TroopTemplate template)
+        //{
+        //    Player = template.player;
+        //    InitialMovePoints = template.movePoints;
+        //    MovePoints = template.movePoints;
+        //    Health = template.health;
+        //    Orientation = template.orientation;
 
-            Position = template.position;
-            StartingPosition = template.position;
-        }
+        //    Position = template.position;
+        //    StartingPosition = template.position;
+        //}
 
-        public void MoveForward()
+        public Troop(PlayerId player, int movePoints, Vector2Int position, int orientation, int health)
         {
-            Position = Hex.GetAdjacentHex(Position, Orientation);
+            Player = player;
+            InitialMovePoints = movePoints;
+            MovePoints = movePoints;
+            Position = position;
+            StartingPosition = position;
+            Orientation = orientation;
+            Health = health;
         }
 
         public void MoveInDirection(int direction)
         {
-            if (MovePoints < 0)
-            {
-                throw new IllegalMoveException("Attempting to move a troop with no move points!");
-            }
-            if (MovePoints > 0) MovePoints--;
+            if (MovePoints <= 0)
+                throw new IllegalMoveException("I have no move points!");
 
+            MovePoints--;
             Orientation = (6 + Orientation + direction) % 6;
             Position = Hex.GetAdjacentHex(Position, Orientation);
         }
 
-        public Vector2Int GetAdjacentHex(int direction)
+        public void FlyOverOtherTroop()
         {
-            direction = (6 + Orientation + direction) % 6;
-            return Hex.GetAdjacentHex(Position, direction);
+            Position = Hex.GetAdjacentHex(Position, Orientation);
         }
 
         public void ApplyDamage()
@@ -75,9 +79,36 @@ namespace GameServer.GameLogic
         }
 
 
-        public override string ToString()
+        // Factories
+        public static Troop Red(int x, int y)
         {
-            return $"cp: {Player}, p: {Position}, o: {Orientation}, imp: {InitialMovePoints}, mp: {MovePoints}, h: {Health}";
+            return new Troop(PlayerId.Red, 5, new Vector2Int(x, y), 3, 2);
         }
+
+        public static Troop Blue(int x, int y)
+        {
+            return new Troop(PlayerId.Blue, 5, new Vector2Int(x, y), 0, 2);
+        }
+
+        public static Troop Red(Vector2Int position)
+        {
+            return new Troop(PlayerId.Red, 5, position, 3, 2);
+        }
+
+        public static Troop Blue(Vector2Int position)
+        {
+            return new Troop(PlayerId.Blue, 5, position, 0, 2);
+        }
+
+        public static Troop Red(Vector2Int position, int orientation)
+        {
+            return new Troop(PlayerId.Red, 5, position, orientation, 2);
+        }
+
+        public static Troop Blue(Vector2Int position, int orientation)
+        {
+            return new Troop(PlayerId.Blue, 5, position, orientation, 2);
+        }
+
     }
 }

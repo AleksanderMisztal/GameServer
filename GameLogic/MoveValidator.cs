@@ -73,7 +73,7 @@ namespace GameServer.GameLogic
 
         private void NotEnteringFriendOrBlocked(Troop troop, int direction)
         {
-            Vector2Int targetPosition = troop.GetAdjacentHex(direction);
+            Vector2Int targetPosition = Hex.GetAdjacentHex(troop.Position, direction);
             Troop encounter = map.Get(targetPosition);
 
             if (encounter == null || encounter.Player != troop.Player) return;

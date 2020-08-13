@@ -65,13 +65,11 @@ namespace GameServer.GameLogic
             return GetEmptyCell(neighbours[0]);
         }
 
-        public List<TroopTemplate> SpawnWave(List<TroopTemplate> wave)
+        public List<Troop> SpawnWave(List<Troop> wave)
         {
-            foreach (var template in wave)
+            foreach (var troop in wave)
             {
-                template.position = GetEmptyCell(template.position);
-                Troop troop = new Troop(template);
-
+                troop.Position = GetEmptyCell(troop.Position);
                 Add(troop);
             }
             return wave;

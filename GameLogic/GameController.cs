@@ -17,10 +17,9 @@ namespace GameServer.GameLogic
         private readonly IBattleResolver battleResolver;
         private readonly Waves waves;
         private readonly Board board;
+        private readonly TroopMap troopMap = new TroopMap();
         private readonly MoveValidator validator;
         private readonly TroopAi troopAi;
-
-        private readonly TroopMap troopMap = new TroopMap();
 
 
         public GameController(Waves waves, Board board)
@@ -80,7 +79,7 @@ namespace GameServer.GameLogic
 
         private NewRoundEvent AddSpawnsForCurrentRoundAndReturnEvent()
         {
-            List<TroopTemplate> wave = waves.GetTroops(roundNumber);
+            List<Troop> wave = waves.GetTroops(roundNumber);
             wave = troopMap.SpawnWave(wave);
             return new NewRoundEvent(wave);
         }
@@ -166,7 +165,7 @@ namespace GameServer.GameLogic
             if (result.AttackerDamaged) ApplyDamage(troop);
             if (result.DefenderDamaged) ApplyDamage(encounter);
 
-            troop.MoveForward();
+            troop.FlyOverOtherTroop();
             
             while ((encounter = troopMap.Get(troop.Position)) != null && troop.Health > 0)
             {
@@ -175,7 +174,7 @@ namespace GameServer.GameLogic
                 if (result.AttackerDamaged) ApplyDamage(troop);
                 if (result.DefenderDamaged) ApplyDamage(encounter);
 
-                troop.MoveForward();
+                troop.FlyOverOtherTroop();
             }
 
             if (troop.Health > 0)

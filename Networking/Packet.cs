@@ -6,7 +6,6 @@ using GameServer.Utils;
 
 namespace GameServer.Networking
 {
-    /// <summary>Sent from server to client.</summary>
     public enum ServerPackets
     {
         Welcome = 1,
@@ -19,7 +18,6 @@ namespace GameServer.Networking
         LostOnTime = 8,
     }
 
-    /// <summary>Sent from client to server.</summary>
     public enum ClientPackets
     {
         JoinLobby = 1,
@@ -34,29 +32,24 @@ namespace GameServer.Networking
         private byte[] readableBuffer;
         private int readPos;
 
-        /// <summary>Creates a new empty packet (without an ID).</summary>
         public Packet()
         {
-            buffer = new List<byte>(); // Intitialize buffer
-            readPos = 0; // Set readPos to 0
+            buffer = new List<byte>();
+            readPos = 0;
         }
 
-        /// <summary>Creates a new packet with a given ID. Used for sending.</summary>
-        /// <param name="_id">The packet ID.</param>
         public Packet(int _id)
         {
-            buffer = new List<byte>(); // Intitialize buffer
-            readPos = 0; // Set readPos to 0
+            buffer = new List<byte>();
+            readPos = 0;
 
-            Write(_id); // Write packet id to the buffer
+            Write(_id);
         }
 
-        /// <summary>Creates a packet from which data can be read. Used for receiving.</summary>
-        /// <param name="_data">The bytes to add to the packet.</param>
         public Packet(byte[] _data)
         {
-            buffer = new List<byte>(); // Intitialize buffer
-            readPos = 0; // Set readPos to 0
+            buffer = new List<byte>();
+            readPos = 0;
 
             SetBytes(_data);
         }
@@ -120,81 +113,68 @@ namespace GameServer.Networking
         #endregion
 
         #region Write Data
-        /// <summary>Adds a byte to the packet.</summary>
-        /// <param name="_value">The byte to add.</param>
         public void Write(byte _value)
         {
             buffer.Add(_value);
         }
-        /// <summary>Adds an array of bytes to the packet.</summary>
-        /// <param name="_value">The byte array to add.</param>
+
         public void Write(byte[] _value)
         {
             buffer.AddRange(_value);
         }
-        /// <summary>Adds a short to the packet.</summary>
-        /// <param name="_value">The short to add.</param>
+
         public void Write(short _value)
         {
             buffer.AddRange(BitConverter.GetBytes(_value));
         }
-        /// <summary>Adds an int to the packet.</summary>
-        /// <param name="_value">The int to add.</param>
+
         public void Write(int _value)
         {
             buffer.AddRange(BitConverter.GetBytes(_value));
         }
-        /// <summary>Adds a long to the packet.</summary>
-        /// <param name="_value">The long to add.</param>
+
         public void Write(long _value)
         {
             buffer.AddRange(BitConverter.GetBytes(_value));
         }
-        /// <summary>Adds a float to the packet.</summary>
-        /// <param name="_value">The float to add.</param>
+
         public void Write(float _value)
         {
             buffer.AddRange(BitConverter.GetBytes(_value));
         }
-        /// <summary>Adds a bool to the packet.</summary>
-        /// <param name="_value">The bool to add.</param>
+
         public void Write(bool _value)
         {
             buffer.AddRange(BitConverter.GetBytes(_value));
         }
-        /// <summary>Adds a string to the packet.</summary>
-        /// <param name="_value">The string to add.</param>
+
         public void Write(string _value)
         {
-            Write(_value.Length); // Add the length of the string to the packet
-            buffer.AddRange(Encoding.ASCII.GetBytes(_value)); // Add the string itself
+            Write(_value.Length);
+            buffer.AddRange(Encoding.ASCII.GetBytes(_value));
         }
-        /// <summary>Adds a Vector2Int to the packet.</summary>
-        /// <param name="_value">The Vector2Int to add.</param>
+
         public void Write(Vector2Int _value)
         {
             Write(_value.X);
             Write(_value.Y);
         }
-        /// <summary>Adds a TroopTemplate to the packet.</summary>
-        /// <param name="_value">The TroopTemplate to add.</param>
-        public void Write(TroopTemplate _value)
+
+        public void Write(Troop _value)
         {
-            Write((int)_value.player);
-            Write(_value.health);
-            Write(_value.movePoints);
-            Write(_value.orientation);
-            Write(_value.position);
+            Write((int)_value.Player);
+            Write(_value.Health);
+            Write(_value.InitialMovePoints);
+            Write(_value.Orientation);
+            Write(_value.Position);
         }
-        /// <summary>Adds a BattleResult to the packet.</summary>
-        /// <param name="_value">The BattleResult to add.</param>
+
         public void Write(BattleResult _value)
         {
             Write(_value.AttackerDamaged);
             Write(_value.DefenderDamaged);
         }
-        /// <summary>Adds a Board to the packet.</summary>
-        /// <param name="_value">The Board to add.</param>
+
         public void Write(Board _value)
         {
             Write(_value.xMin);
@@ -205,20 +185,16 @@ namespace GameServer.Networking
         #endregion
 
         #region Read Data
-        /// <summary>Reads a byte from the packet.</summary>
-        /// <param name="_moveReadPos">Whether or not to move the buffer's read position.</param>
         public byte ReadByte(bool _moveReadPos = true)
         {
             if (buffer.Count > readPos)
             {
-                // If there are unread bytes
-                byte _value = readableBuffer[readPos]; // Get the byte at readPos' position
+                byte _value = readableBuffer[readPos];
                 if (_moveReadPos)
                 {
-                    // If _moveReadPos is true
-                    readPos += 1; // Increase readPos by 1
+                    readPos += 1;
                 }
-                return _value; // Return the byte
+                return _value;
             }
             else
             {
@@ -226,21 +202,16 @@ namespace GameServer.Networking
             }
         }
 
-        /// <summary>Reads an array of bytes from the packet.</summary>
-        /// <param name="_length">The length of the byte array.</param>
-        /// <param name="_moveReadPos">Whether or not to move the buffer's read position.</param>
         public byte[] ReadBytes(int _length, bool _moveReadPos = true)
         {
             if (buffer.Count > readPos)
             {
-                // If there are unread bytes
-                byte[] _value = buffer.GetRange(readPos, _length).ToArray(); // Get the bytes at readPos' position with a range of _length
+                byte[] _value = buffer.GetRange(readPos, _length).ToArray();
                 if (_moveReadPos)
                 {
-                    // If _moveReadPos is true
-                    readPos += _length; // Increase readPos by _length
+                    readPos += _length;
                 }
-                return _value; // Return the bytes
+                return _value;
             }
             else
             {
@@ -248,20 +219,16 @@ namespace GameServer.Networking
             }
         }
 
-        /// <summary>Reads a short from the packet.</summary>
-        /// <param name="_moveReadPos">Whether or not to move the buffer's read position.</param>
         public short ReadShort(bool _moveReadPos = true)
         {
             if (buffer.Count > readPos)
             {
-                // If there are unread bytes
-                short _value = BitConverter.ToInt16(readableBuffer, readPos); // Convert the bytes to a short
+                short _value = BitConverter.ToInt16(readableBuffer, readPos);
                 if (_moveReadPos)
                 {
-                    // If _moveReadPos is true and there are unread bytes
-                    readPos += 2; // Increase readPos by 2
+                    readPos += 2;
                 }
-                return _value; // Return the short
+                return _value;
             }
             else
             {
@@ -269,20 +236,16 @@ namespace GameServer.Networking
             }
         }
 
-        /// <summary>Reads an int from the packet.</summary>
-        /// <param name="_moveReadPos">Whether or not to move the buffer's read position.</param>
         public int ReadInt(bool _moveReadPos = true)
         {
             if (buffer.Count > readPos)
             {
-                // If there are unread bytes
-                int _value = BitConverter.ToInt32(readableBuffer, readPos); // Convert the bytes to an int
+                int _value = BitConverter.ToInt32(readableBuffer, readPos);
                 if (_moveReadPos)
                 {
-                    // If _moveReadPos is true
-                    readPos += 4; // Increase readPos by 4
+                    readPos += 4;
                 }
-                return _value; // Return the int
+                return _value;
             }
             else
             {
@@ -290,20 +253,16 @@ namespace GameServer.Networking
             }
         }
 
-        /// <summary>Reads a long from the packet.</summary>
-        /// <param name="_moveReadPos">Whether or not to move the buffer's read position.</param>
         public long ReadLong(bool _moveReadPos = true)
         {
             if (buffer.Count > readPos)
             {
-                // If there are unread bytes
-                long _value = BitConverter.ToInt64(readableBuffer, readPos); // Convert the bytes to a long
+                long _value = BitConverter.ToInt64(readableBuffer, readPos);
                 if (_moveReadPos)
                 {
-                    // If _moveReadPos is true
-                    readPos += 8; // Increase readPos by 8
+                    readPos += 8;
                 }
-                return _value; // Return the long
+                return _value;
             }
             else
             {
@@ -311,20 +270,16 @@ namespace GameServer.Networking
             }
         }
 
-        /// <summary>Reads a float from the packet.</summary>
-        /// <param name="_moveReadPos">Whether or not to move the buffer's read position.</param>
         public float ReadFloat(bool _moveReadPos = true)
         {
             if (buffer.Count > readPos)
             {
-                // If there are unread bytes
-                float _value = BitConverter.ToSingle(readableBuffer, readPos); // Convert the bytes to a float
+                float _value = BitConverter.ToSingle(readableBuffer, readPos);
                 if (_moveReadPos)
                 {
-                    // If _moveReadPos is true
-                    readPos += 4; // Increase readPos by 4
+                    readPos += 4;
                 }
-                return _value; // Return the float
+                return _value;
             }
             else
             {
@@ -332,20 +287,16 @@ namespace GameServer.Networking
             }
         }
 
-        /// <summary>Reads a bool from the packet.</summary>
-        /// <param name="_moveReadPos">Whether or not to move the buffer's read position.</param>
         public bool ReadBool(bool _moveReadPos = true)
         {
             if (buffer.Count > readPos)
             {
-                // If there are unread bytes
-                bool _value = BitConverter.ToBoolean(readableBuffer, readPos); // Convert the bytes to a bool
+                bool _value = BitConverter.ToBoolean(readableBuffer, readPos);
                 if (_moveReadPos)
                 {
-                    // If _moveReadPos is true
-                    readPos += 1; // Increase readPos by 1
+                    readPos += 1;
                 }
-                return _value; // Return the bool
+                return _value;
             }
             else
             {
@@ -353,20 +304,17 @@ namespace GameServer.Networking
             }
         }
 
-        /// <summary>Reads a string from the packet.</summary>
-        /// <param name="_moveReadPos">Whether or not to move the buffer's read position.</param>
         public string ReadString(bool _moveReadPos = true)
         {
             try
             {
-                int _length = ReadInt(); // Get the length of the string
-                string _value = Encoding.ASCII.GetString(readableBuffer, readPos, _length); // Convert the bytes to a string
+                int _length = ReadInt();
+                string _value = Encoding.ASCII.GetString(readableBuffer, readPos, _length);
                 if (_moveReadPos && _value.Length > 0)
                 {
-                    // If _moveReadPos is true string is not empty
-                    readPos += _length; // Increase readPos by the length of the string
+                    readPos += _length;
                 }
-                return _value; // Return the string
+                return _value;
             }
             catch
             {
@@ -374,8 +322,6 @@ namespace GameServer.Networking
             }
         }
 
-        /// <summary>Reads a Vector2Int from the packet.</summary>
-        /// <param name="_moveReadPos">Whether or not to move the buffer's read position.</param>
         public Vector2Int ReadVector2Int(bool _moveReadPos = true)
         {
             int x = ReadInt(_moveReadPos);
@@ -384,24 +330,10 @@ namespace GameServer.Networking
             return new Vector2Int(x, y);
         }
 
-        /// <summary>Reads a TroopTemplate from the packet.</summary>
-        /// <param name="_moveReadPos">Whether or not to move the buffer's read position.</param>
-        public TroopTemplate ReadTroopTemplate(bool _moveReadPos = true)
-        {
-            PlayerId controllingPlayer = (PlayerId)ReadInt(_moveReadPos);
-            int health = ReadInt(_moveReadPos);
-            int movePoints = ReadInt(_moveReadPos);
-            int orientation = ReadInt(_moveReadPos);
-
-            return new TroopTemplate(controllingPlayer, movePoints, health, orientation);
-        }
-
-        /// <summary>Reads a TroopTemplate from the packet.</summary>
-        /// <param name="_moveReadPos">Whether or not to move the buffer's read position.</param>
         public BattleResult ReadBattleResult(bool _moveReadPos = true)
         {
-            bool attackerDamaged = ReadBool();
-            bool defenderDamaged = ReadBool();
+            bool attackerDamaged = ReadBool(_moveReadPos);
+            bool defenderDamaged = ReadBool(_moveReadPos);
 
             return new BattleResult(defenderDamaged, attackerDamaged);
         }

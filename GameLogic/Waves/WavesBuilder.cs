@@ -5,13 +5,10 @@ namespace GameServer.GameLogic
 {
     public class WavesBuilder
     {
-        private Dictionary<int, List<TroopTemplate>> troopsForRound = new Dictionary<int, List<TroopTemplate>>();
+        private readonly Dictionary<int, List<Troop>> troopsForRound = new Dictionary<int, List<Troop>>();
 
         private int maxRedWave = 0;
         private int maxBlueWave = 0;
-
-        private static readonly TroopTemplate blueTroop = new TroopTemplate(PlayerId.Blue, 5, 2, 0);
-        private static readonly TroopTemplate redTroop = new TroopTemplate(PlayerId.Red, 5, 2, 3);
 
         public WavesBuilder Add(int round, int x, int y, PlayerId player)
         {
@@ -32,17 +29,16 @@ namespace GameServer.GameLogic
 
         private void AddTroopToRound(int round, Vector2Int position, PlayerId player)
         {
-            var template = player == PlayerId.Red ? redTroop : blueTroop;
-            var positionedTemplate = template.Deploy(position);
+            Troop troop = player == PlayerId.Red ? Troop.Red(position) : Troop.Blue(position);
 
             try
             {
-                troopsForRound[round].Add(positionedTemplate);
+                troopsForRound[round].Add(troop);
             }
             catch (KeyNotFoundException)
             {
-                troopsForRound[round] = new List<TroopTemplate>();
-                troopsForRound[round].Add(positionedTemplate);
+                troopsForRound[round] = new List<Troop>();
+                troopsForRound[round].Add(troop);
             }
         }
 
