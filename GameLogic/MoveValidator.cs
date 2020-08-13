@@ -6,14 +6,16 @@ namespace GameServer.GameLogic
     public class MoveValidator
     {
         private readonly TroopMap map;
+        private readonly Board board;
         private PlayerId activePlayer;
 
         public string Message { get; private set; } = null;
 
 
-        public MoveValidator(TroopMap map, PlayerId player0)
+        public MoveValidator(TroopMap map, Board board, PlayerId player0)
         {
             this.map = map;
+            this.board = board;
             this.activePlayer = player0;
         }
 
@@ -31,7 +33,7 @@ namespace GameServer.GameLogic
                 Troop troop = map.Get(position);
                 PlayerControllsTroop(player, troop);
                 TroopHasMovePoints(troop);
-                NotBlockedByFriendsOrBoard(troop, direction, board);
+                NotEnteringFriendOrBlocked(troop, direction);
 
                 Message = "Move is valid.";
                 return true;
@@ -69,22 +71,28 @@ namespace GameServer.GameLogic
                 throw new IllegalMoveException("Attempting to move a troop with no move points!");
         }
 
-        // TODO: fix logic 
-        private void NotBlockedByFriendsOrBoard(Troop troop, int direction, Board board)
+        private void NotEnteringFriendOrBlocked(Troop troop, int direction)
         {
             Vector2Int targetPosition = troop.GetAdjacentHex(direction);
             Troop encounter = map.Get(targetPosition);
-            if (encounter != null && encounter.Player == troop.Player)
+
+            if (encounter == null || encounter.Player != troop.Player) return;
+
+            // Tries to enter a friend so throw if has some other legal move
+            foreach (var cell in troop.ControllZone)
             {
-                foreach (var cell in Hex.GetControllZone(troop.Position, troop.Orientation))
-                {
-                    encounter = map.Get(targetPosition);
-                    if (!board.IsOutside(targetPosition)
-                        && (encounter != null || encounter.Player != troop.Player))
-                    {
-                        throw new IllegalMoveException("Attempting to enter a cell with friendly troop!");
-                    }
-                }
+                ThrowIfNotBlocked(troop, cell);
+            }
+        }
+
+        private void ThrowIfNotBlocked(Troop troop, Vector2Int cell)
+        {
+            if (board.IsOutside(cell)) return;
+
+            Troop encounter = map.Get(cell);
+            if (encounter == null || encounter.Player != troop.Player)
+            {
+                throw new IllegalMoveException("Attempting to enter a cell with friendly troop!");
             }
         }
     }

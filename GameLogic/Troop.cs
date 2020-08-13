@@ -58,14 +58,14 @@ namespace GameServer.GameLogic
                 MovePoints--;
         }
 
-        public bool InControlZone(Vector2Int cell)
+        public Vector2Int[] ControllZone => Hex.GetControllZone(Position, Orientation);
+
+        public bool InControlZone(Vector2Int position)
         {
-            for (int rotation = -1; rotation <= 1; rotation++)
-            {
-                int dir = (6 + Orientation + rotation) % 6;
-                Vector2Int controlledCell = Hex.GetAdjacentHex(Position, dir);
-                if (cell == controlledCell) return true;
-            }
+            foreach (var cell in ControllZone)
+                if (cell == position)
+                    return true;
+
             return false;
         }
 

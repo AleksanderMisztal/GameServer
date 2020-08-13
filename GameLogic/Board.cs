@@ -4,6 +4,8 @@ namespace GameServer.GameLogic
 {
     public class Board
     {
+        // TODO: Only two params, always start at 0,0
+
         public readonly int xMin;
         public readonly int xMax;
         public readonly int yMax;

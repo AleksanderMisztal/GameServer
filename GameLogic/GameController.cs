@@ -28,7 +28,7 @@ namespace GameServer.GameLogic
             battleResolver = new StandardBattles();
             this.waves = waves;
             this.board = board;
-            validator = new MoveValidator(troopMap, activePlayer);
+            validator = new MoveValidator(troopMap, board, activePlayer);
             troopAi = new TroopAi(troopMap, board);
         }
 
@@ -37,7 +37,7 @@ namespace GameServer.GameLogic
             this.battleResolver = battleResolver;
             this.waves = waves;
             this.board = board;
-            validator = new MoveValidator(troopMap, activePlayer);
+            validator = new MoveValidator(troopMap, board, activePlayer);
             troopAi = new TroopAi(troopMap, board);
         }
 
