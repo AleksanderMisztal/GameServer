@@ -7,6 +7,12 @@ namespace GameServer.Networking
 {
     public static class ServerSend
     {
+        public static async Task Welcome(int toClient)
+        {
+            using Packet packet = new Packet((int)ServerPackets.Welcome);
+            await Server.SendPacket(toClient, packet);
+        }
+
         public static async Task GameJoined(int toClient, string opponentName, PlayerSide side, Board board)
         {
             using Packet packet = new Packet((int)ServerPackets.GameJoined);

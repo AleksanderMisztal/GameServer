@@ -11,22 +11,20 @@ namespace GameServer.Networking
         private static readonly Dictionary<int, Game> clientToGame = new Dictionary<int, Game>();
 
         private static bool someoneWaiting = false;
-        private static User waitingClient;
+        private static User waitingUser;
 
-
-        public static async Task SendToGame(int client, string username)
+        public static async Task SendToGame(User newUser)
         {
-            User newClient = new User(client, username);
             if (someoneWaiting)
             {
                 someoneWaiting = false;
-                Randomizer.RandomlyAssign(newClient, waitingClient, out User playingRed, out User playingBlue);
-                await InitializeNewGame(playingRed, playingBlue);
+                Randomizer.RandomlyAssign(newUser, waitingUser, out User redUser, out User blueUser);
+                await InitializeNewGame(redUser, blueUser);
             }
             else
             {
                 someoneWaiting = true;
-                waitingClient = newClient;
+                waitingUser = newUser;
             }
         }
 
@@ -34,54 +32,49 @@ namespace GameServer.Networking
         {
             Waves waves = Waves.Basic();
             Board board = Board.standard;
-            Game game = new Game(new GameController(waves, board), playingRed, playingBlue);
+            Game game = new Game(playingRed, playingBlue, board, waves);
 
             clientToGame[playingRed.id] = game;
             clientToGame[playingBlue.id] = game;
 
-            await game.Initialize(board);
+            await game.Initialize();
         }
 
         public static async Task MoveTroop(int client, Vector2Int position, int direction)
         {
-            if (clientToGame.TryGetValue(client, out Game game))
+            Game game = clientToGame[client];
+            List<IGameEvent> events = game.MakeMove(client, position, direction);
+            foreach (var ev in events)
             {
-                List<IGameEvent> events = game.MakeMove(client, position, direction);
-                foreach (var ev in events)
-                {
-                    await ServerSend.GameEvent(game.blueUser.id, ev);
-                    await ServerSend.GameEvent(game.redUser.id, ev);
-                }
+                await ServerSend.GameEvent(game.blueUser.id, ev);
+                await ServerSend.GameEvent(game.redUser.id, ev);
             }
         }
 
         public static async Task SendMessage(int client, string message)
         {
-            if (clientToGame.TryGetValue(client, out Game game))
-            {
-                int oponent = game.blueUser.id ^ game.redUser.id ^ client;
-                await ServerSend.MessageSent(oponent, message);
-            }
-            else
-            {
-                await ServerSend.OpponentDisconnected(client);
-            }
+            int oponent = GetOpponent(client);
+            await ServerSend.MessageSent(oponent, message);
         }
 
-        public static async Task ClientDisconnected(int clientId)
+        public static async Task ClientDisconnected(int client)
         {
-            if (someoneWaiting && clientId == waitingClient.id)
+            if (someoneWaiting && client == waitingUser.id)
                 someoneWaiting = false;
 
-            if (clientToGame.TryGetValue(clientId, out Game game))
-            {
-                int oponent = clientId ^ game.blueUser.id ^ game.redUser.id;
+            int oponent = GetOpponent(client);
 
-                clientToGame.Remove(clientId);
-                clientToGame.Remove(oponent);
+            clientToGame.Remove(client);
+            clientToGame.Remove(oponent);
 
-                await ServerSend.OpponentDisconnected(oponent);
-            }
+            await ServerSend.OpponentDisconnected(oponent);
+        }
+
+        private static int GetOpponent(int client)
+        {
+            Game game = clientToGame[client];
+            int oponentId = game.blueUser.id ^ game.redUser.id ^ client;
+            return oponentId;
         }
     }
 }

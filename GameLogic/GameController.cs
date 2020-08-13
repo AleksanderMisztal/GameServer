@@ -95,7 +95,7 @@ namespace GameServer.GameLogic
         {
             List<IGameEvent> events = new List<IGameEvent>();
 
-            if (validator.IsLegalMove(player, position, direction, board))
+            if (validator.IsLegalMove(player, position, direction))
             {
                 Troop troop = troopMap.Get(position);
                 TroopMovedEvent mainMove = MoveTroop(position, direction);

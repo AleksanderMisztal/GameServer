@@ -24,7 +24,7 @@ namespace GameServer.GameLogic
             activePlayer = activePlayer.Opponent();
         }
 
-        public bool IsLegalMove(PlayerSide player, Vector2Int position, int direction, Board board)
+        public bool IsLegalMove(PlayerSide player, Vector2Int position, int direction)
         {
             try
             {

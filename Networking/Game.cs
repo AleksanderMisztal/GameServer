@@ -8,15 +8,19 @@ namespace GameServer.Networking
 {
     public class Game
     {
-        private readonly GameController controller;
         public readonly User redUser;
         public readonly User blueUser;
+        private readonly Board board;
+        private readonly Waves waves;
 
-        public Game(GameController controller, User redUser, User blueUser)
+        private GameController controller = null;
+
+        public Game(User redUser, User blueUser, Board board, Waves waves)
         {
-            this.controller = controller;
             this.redUser = redUser;
             this.blueUser = blueUser;
+            this.board = board;
+            this.waves = waves;
         }
 
         public List<IGameEvent> MakeMove(int client, Vector2Int position, int direction)
@@ -34,8 +38,11 @@ namespace GameServer.Networking
             throw new KeyNotFoundException();
         }
 
-        public async Task Initialize(Board board)
+        public async Task Initialize()
         {
+            if (controller != null) return;
+
+            controller = new GameController(waves, board);
             await ServerSend.GameJoined(redUser.id, blueUser.name, PlayerSide.Red, board);
             await ServerSend.GameJoined(blueUser.id, redUser.name, PlayerSide.Blue, board);
 

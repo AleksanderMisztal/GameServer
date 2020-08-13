@@ -6,17 +6,11 @@ namespace GameServer.Networking
 {
     class ServerHandle
     {
-        public static async Task JoinLobby(int fromClient, Packet packet)
-        {
-            string username = packet.ReadString();
-            Console.WriteLine($"Client with id {fromClient} joins with username {username}.");
-            GameHandler.AddToLobby(fromClient, username);
-        }
-
         public static async Task JoinGame(int fromClient, Packet packet)
         {
-            Console.WriteLine($"Client with id {fromClient} is being sent to game");
-            await GameHandler.SendToGame(fromClient);
+            string username = packet.ReadString();
+            User newUser = new User(fromClient, username);
+            await GameHandler.SendToGame(newUser);
         }
 
         public static async Task MoveTroop(int fromClient, Packet packet)

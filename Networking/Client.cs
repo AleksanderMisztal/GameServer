@@ -36,7 +36,7 @@ namespace GameServer.Networking
             {
                 this.socket = socket;
                 isConnected = true;
-                await Server.SendPacket(id, new WelcomeEvent("Welcome to the server!"));
+                await ServerSend.Welcome(id);
                 while (isConnected)
                 {
                     await BeginReceive();
@@ -59,17 +59,15 @@ namespace GameServer.Networking
 
                 if (result.MessageType != WebSocketMessageType.Close)
                 {
-                    using (var reader = new StreamReader(memoryStream, Encoding.UTF8))
+                    using var reader = new StreamReader(memoryStream, Encoding.UTF8);
+                    string bytes = reader.ReadToEnd();
+                    try
                     {
-                        string bytes = reader.ReadToEnd();
-                        try
-                        {
-                            return Serializer.Deserialize(bytes);
-                        }
-                        catch
-                        {
-                            Console.WriteLine("Couldn't convert to bytes");
-                        }
+                        return Serializer.Deserialize(bytes);
+                    }
+                    catch
+                    {
+                        Console.WriteLine("Couldn't convert to bytes");
                     }
                 }
                 return null;
@@ -97,17 +95,15 @@ namespace GameServer.Networking
 
                 ThreadManager.ExecuteOnMainThread(async () =>
                 {
-                    using (Packet packet = new Packet(data))
+                    using Packet packet = new Packet(data);
+                    int packetType = packet.ReadInt();
+                    try
                     {
-                        int packetType = packet.ReadInt();
-                        try
-                        {
-                            await Server.packetHandlers[packetType](id, packet);
-                        }
-                        catch (KeyNotFoundException)
-                        {
-                            Console.WriteLine("Unsupported packet type: " + packetType);
-                        }
+                        await Server.packetHandlers[packetType](id, packet);
+                    }
+                    catch (KeyNotFoundException)
+                    {
+                        Console.WriteLine("Unsupported packet type: " + packetType);
                     }
                 });
             }

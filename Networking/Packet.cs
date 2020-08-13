@@ -20,10 +20,9 @@ namespace GameServer.Networking
 
     public enum ClientPackets
     {
-        JoinLobby = 1,
-        JoinGame = 2,
-        MoveTroop = 3,
-        SendMessage = 4,
+        JoinGame = 1,
+        MoveTroop = 2,
+        SendMessage = 3,
     }
 
     public class Packet : IDisposable

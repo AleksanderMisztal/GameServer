@@ -29,7 +29,6 @@ namespace GameServer.Networking
         {
             packetHandlers = new Dictionary<int, PacketHandler>
             {
-                {(int) ClientPackets.JoinLobby, ServerHandle.JoinLobby },
                 {(int) ClientPackets.JoinGame, ServerHandle.JoinGame },
                 {(int) ClientPackets.MoveTroop, ServerHandle.MoveTroop },
                 {(int) ClientPackets.SendMessage, ServerHandle.SendMessage },
