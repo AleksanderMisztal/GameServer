@@ -11,7 +11,7 @@ namespace GameServer.Networking
     {
         public static readonly Dictionary<int, Game> games = new Dictionary<int, Game>();
         private static readonly Dictionary<int, Game> clientToGame = new Dictionary<int, Game>();
-        private static readonly Dictionary<int, PlayerId> clientToColor = new Dictionary<int, PlayerId>();
+        private static readonly Dictionary<int, PlayerSide> clientToColor = new Dictionary<int, PlayerSide>();
         public static readonly Dictionary<int, string> clientToUsername = new Dictionary<int, string>();
 
         private static int nextGameId = 0;
@@ -59,13 +59,13 @@ namespace GameServer.Networking
             clientToGame[playingRed] = game;
             clientToGame[playingBlue] = game;
 
-            clientToColor[playingBlue] = PlayerId.Blue;
-            clientToColor[playingRed] = PlayerId.Red;
+            clientToColor[playingBlue] = PlayerSide.Blue;
+            clientToColor[playingRed] = PlayerSide.Red;
 
             //TODO: should send game started
 
-            var redGameJoined = new GameJoinedEvent(clientToUsername[playingBlue], PlayerId.Red, board);
-            var blueGameJoined = new GameJoinedEvent(clientToUsername[playingRed], PlayerId.Blue, board);
+            var redGameJoined = new GameJoinedEvent(clientToUsername[playingBlue], PlayerSide.Red, board);
+            var blueGameJoined = new GameJoinedEvent(clientToUsername[playingRed], PlayerSide.Blue, board);
 
             await ServerSend.SendEvent(playingRed, redGameJoined);
             await ServerSend.SendEvent(playingBlue, blueGameJoined);
@@ -80,7 +80,7 @@ namespace GameServer.Networking
         {
             if (clientToGame.TryGetValue(client, out Game game))
             {
-                PlayerId color = clientToColor[client];
+                PlayerSide color = clientToColor[client];
                 try
                 {
                     List<IServerEvent> events = game.Controller.ProcessMove(color, position, direction);

@@ -8,7 +8,7 @@ namespace GameServer.GameLogic
 {
     public class GameController
     {
-        private PlayerId activePlayer = PlayerId.Red;
+        private PlayerSide activePlayer = PlayerSide.Red;
         private int roundNumber = 0;
         private int movePointsLeft;
 
@@ -84,14 +84,14 @@ namespace GameServer.GameLogic
             return new NewRoundEvent(wave);
         }
 
-        private void SetInitialMovePointsLeft(PlayerId player)
+        private void SetInitialMovePointsLeft(PlayerSide player)
         {
             HashSet<Troop> troops = troopMap.GetTroops(player);
             movePointsLeft = troops.Aggregate(0, (acc, t) => acc + t.InitialMovePoints);
         }
 
 
-        public List<IServerEvent> ProcessMove(PlayerId player, Vector2Int position, int direction)
+        public List<IServerEvent> ProcessMove(PlayerSide player, Vector2Int position, int direction)
         {
             List<IServerEvent> events = new List<IServerEvent>();
 
@@ -136,8 +136,8 @@ namespace GameServer.GameLogic
 
         private bool GameHasEnded()
         {
-            bool redLost = troopMap.GetTroops(PlayerId.Red).Count == 0 && waves.maxRedWave <= roundNumber;
-            bool blueLost = troopMap.GetTroops(PlayerId.Blue).Count == 0 && waves.maxBlueWave <= roundNumber;
+            bool redLost = troopMap.GetTroops(PlayerSide.Red).Count == 0 && waves.maxRedWave <= roundNumber;
+            bool blueLost = troopMap.GetTroops(PlayerSide.Blue).Count == 0 && waves.maxBlueWave <= roundNumber;
 
             return redLost || blueLost;
         }
@@ -187,7 +187,7 @@ namespace GameServer.GameLogic
 
         private void ApplyDamage(Troop troop)
         {
-            PlayerId opponent = troop.Player.Opponent();
+            PlayerSide opponent = troop.Player.Opponent();
             score.Increment(opponent);
 
             if (troop.Player == activePlayer && troop.MovePoints > 0)

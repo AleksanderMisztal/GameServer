@@ -5,9 +5,9 @@ namespace GameServer.GameLogic.ServerEvents
 {
     public class LostOnTimeEvent : IServerEvent
     {
-        private PlayerId looser;
+        private PlayerSide looser;
 
-        public LostOnTimeEvent(PlayerId looser)
+        public LostOnTimeEvent(PlayerSide looser)
         {
             this.looser = looser;
         }

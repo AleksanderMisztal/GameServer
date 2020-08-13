@@ -6,10 +6,10 @@ namespace GameServer.GameLogic.ServerEvents
     public class GameJoinedEvent : IServerEvent
     {
         private string opponentName;
-        private PlayerId side;
+        private PlayerSide side;
         private Board board;
 
-        public GameJoinedEvent(string opponentName, PlayerId side, Board board)
+        public GameJoinedEvent(string opponentName, PlayerSide side, Board board)
         {
             this.opponentName = opponentName;
             this.side = side;

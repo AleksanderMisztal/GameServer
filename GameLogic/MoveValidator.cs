@@ -7,12 +7,12 @@ namespace GameServer.GameLogic
     {
         private readonly TroopMap map;
         private readonly Board board;
-        private PlayerId activePlayer;
+        private PlayerSide activePlayer;
 
         public string Message { get; private set; } = null;
 
 
-        public MoveValidator(TroopMap map, Board board, PlayerId player0)
+        public MoveValidator(TroopMap map, Board board, PlayerSide player0)
         {
             this.map = map;
             this.board = board;
@@ -24,7 +24,7 @@ namespace GameServer.GameLogic
             activePlayer = activePlayer.Opponent();
         }
 
-        public bool IsLegalMove(PlayerId player, Vector2Int position, int direction, Board board)
+        public bool IsLegalMove(PlayerSide player, Vector2Int position, int direction, Board board)
         {
             try
             {
@@ -47,7 +47,7 @@ namespace GameServer.GameLogic
         }
 
 
-        private void IsPlayersTurn(PlayerId player)
+        private void IsPlayersTurn(PlayerSide player)
         {
             if (player != activePlayer)
                 throw new IllegalMoveException("Attempting to make a move in oponent's turn!");
@@ -59,7 +59,7 @@ namespace GameServer.GameLogic
                 throw new IllegalMoveException("No troop at the specified hex!");
         }
 
-        private void PlayerControllsTroop(PlayerId player, Troop troop)
+        private void PlayerControllsTroop(PlayerSide player, Troop troop)
         {
             if (player != troop.Player)
                 throw new IllegalMoveException("Attempting to move enemy troop!");

@@ -23,9 +23,9 @@ namespace GameServer.GameLogic
             troop.StartingPosition = troop.Position;
         }
 
-        public HashSet<Troop> GetTroops(PlayerId player)
+        public HashSet<Troop> GetTroops(PlayerSide player)
         {
-            return player == PlayerId.Red ? redTroops : blueTroops;
+            return player == PlayerSide.Red ? redTroops : blueTroops;
         }
 
         public Troop Get(Vector2Int position)
