@@ -18,6 +18,7 @@ namespace GameServer.GameLogic
         private readonly Waves waves;
         private readonly Board board;
         private readonly MoveValidator validator;
+        private readonly TroopAi troopAi;
 
         private readonly TroopMap troopMap = new TroopMap();
         private readonly HashSet<Troop> aiControlled = new HashSet<Troop>();
@@ -29,6 +30,7 @@ namespace GameServer.GameLogic
             this.waves = waves;
             this.board = board;
             validator = new MoveValidator(troopMap, activePlayer);
+            troopAi = new TroopAi(troopMap, board);
         }
 
         public GameController(IBattleResolver battleResolver, Board board, Waves waves)
@@ -37,6 +39,7 @@ namespace GameServer.GameLogic
             this.waves = waves;
             this.board = board;
             validator = new MoveValidator(troopMap, activePlayer);
+            troopAi = new TroopAi(troopMap, board);
         }
 
         
@@ -200,9 +203,9 @@ namespace GameServer.GameLogic
             aiControlled.RemoveWhere(t => !board.IsOutside(t.Position));
 
             List<TroopMovedEvent> events = new List<TroopMovedEvent>();
-            foreach (var troop in aiControlled)
+            foreach (var troop in troopMap.GetTroops(activePlayer))
             {
-                if (troop.Player == activePlayer)
+                if (troopAi.ShouldControllWithAi(troop))
                 {
                     var moveEvents = ControllWithAI(troop);
                     events.AddRange(moveEvents);
