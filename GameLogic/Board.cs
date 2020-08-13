@@ -9,20 +9,19 @@ namespace GameServer.GameLogic
         public readonly int yMax;
         public readonly int yMin;
 
+        public Vector2Int Center { get; private set; }
+
         public Board(int xMin, int xMax, int yMin, int yMax)
         {
             this.xMin = xMin;
             this.xMax = xMax;
             this.yMin = yMin;
             this.yMax = yMax;
-        }
 
-        public Vector2Int GetCenter()
-        {
             int x = (xMax + xMin) / 2;
             int y = (yMax + yMin) / 2;
 
-            return new Vector2Int(x, y);
+            Center = new Vector2Int(x, y);
         }
 
         public bool IsOutside(Vector2Int p)

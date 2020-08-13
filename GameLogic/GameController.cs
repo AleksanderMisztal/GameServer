@@ -21,7 +21,6 @@ namespace GameServer.GameLogic
         private readonly TroopAi troopAi;
 
         private readonly TroopMap troopMap = new TroopMap();
-        private readonly HashSet<Troop> aiControlled = new HashSet<Troop>();
 
 
         public GameController(Waves waves, Board board)
@@ -104,8 +103,7 @@ namespace GameServer.GameLogic
                 events.Add(mainMove);
                 if (board.IsOutside(troop.Position))
                 {
-                    aiControlled.Add(troop);
-                    var aiMoveEvents = ControllWithAI(troop);
+                    var aiMoveEvents = ControllWithAi(troop);
                     events.AddRange(aiMoveEvents);
                 }
 
@@ -122,6 +120,18 @@ namespace GameServer.GameLogic
                 events.Add(gameEndEvent);
             }
 
+            return events;
+        }
+
+        private List<TroopMovedEvent> ControllWithAi(Troop troop)
+        {
+            List<TroopMovedEvent> events = new List<TroopMovedEvent>();
+            while (troopAi.ShouldControll(troop) && troop.MovePoints > 0)
+            {
+                int direction = troopAi.GetOptimalDirection(troop);
+                var moveEvent = MoveTroop(troop.Position, direction);
+                events.Add(moveEvent);
+            }
             return events;
         }
 
@@ -200,51 +210,13 @@ namespace GameServer.GameLogic
 
         private List<TroopMovedEvent> ExecuteAiMoves()
         {
-            aiControlled.RemoveWhere(t => !board.IsOutside(t.Position));
-
             List<TroopMovedEvent> events = new List<TroopMovedEvent>();
             foreach (var troop in troopMap.GetTroops(activePlayer))
             {
-                if (troopAi.ShouldControllWithAi(troop))
+                if (troopAi.ShouldControll(troop))
                 {
-                    var moveEvents = ControllWithAI(troop);
+                    var moveEvents = ControllWithAi(troop);
                     events.AddRange(moveEvents);
-                }
-            }
-            return events;
-        }
-
-        // TODO: Extract a TroopAI class
-        private List<TroopMovedEvent> ControllWithAI(Troop troop)
-        {
-            Vector2Int target = board.GetCenter();
-
-            List<TroopMovedEvent> events = new List<TroopMovedEvent>();
-
-            while (troop.MovePoints > 0)
-            {
-                int minDist = 1000000;
-                int minDir = 0;
-                for (int dir = -1; dir <= 1; dir += 2)
-                {
-                    Vector2Int neigh = Hex.GetAdjacentHex(troop.Position, (6 + dir + troop.Orientation) % 6);
-                    if (troopMap.Get(neigh) != null) continue;
-
-                    int dist = (target - neigh).SqrMagnitude;
-                    if (dist < minDist)
-                    {
-                        minDist = dist;
-                        minDir = dir;
-                    }
-                }
-
-                var troopMovedEvent = MoveTroop(troop.Position, minDir);
-                events.Add(troopMovedEvent);
-
-                if (!board.IsOutside(troop.Position))
-                {
-                    aiControlled.Remove(troop);
-                    break;
                 }
             }
             return events;

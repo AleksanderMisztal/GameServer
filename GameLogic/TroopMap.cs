@@ -28,12 +28,6 @@ namespace GameServer.GameLogic
             return player == PlayerId.Red ? redTroops : blueTroops;
         }
 
-        public void Add(Troop troop)
-        {
-            map.Add(troop.Position, troop);
-            GetTroops(troop.Player).Add(troop);
-        }
-
         public Troop Get(Vector2Int position)
         {
             try
@@ -81,6 +75,12 @@ namespace GameServer.GameLogic
                 Add(troop);
             }
             return wave;
+        }
+
+        private void Add(Troop troop)
+        {
+            map.Add(troop.Position, troop);
+            GetTroops(troop.Player).Add(troop);
         }
     }
 }
