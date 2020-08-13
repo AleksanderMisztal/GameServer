@@ -176,9 +176,7 @@ namespace GameServer.Networking
 
         public void Write(Board _value)
         {
-            Write(_value.xMin);
             Write(_value.xMax);
-            Write(_value.yMin);
             Write(_value.yMax);
         }
         #endregion
