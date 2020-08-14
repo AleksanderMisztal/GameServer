@@ -1,18 +1,20 @@
 ﻿using GameServer.Utils;
+using System;
 using System.Collections.Generic;
 
 namespace GameServer.GameLogic
 {
     public class TroopMap
     {
-        private readonly Dictionary<Vector2Int, Troop> map;
+        private readonly Dictionary<Vector2Int, Troop> map = new Dictionary<Vector2Int, Troop>();
 
         private readonly HashSet<Troop> redTroops = new HashSet<Troop>();
         private readonly HashSet<Troop> blueTroops = new HashSet<Troop>();
+        private readonly Board board;
 
-        public TroopMap()
+        public TroopMap(Board board)
         {
-            map = new Dictionary<Vector2Int, Troop>();
+            this.board = board;
         }
 
         public void AdjustPosition(Troop troop)
@@ -46,23 +48,23 @@ namespace GameServer.GameLogic
             GetTroops(troop.Player).Remove(troop);
         }
 
-        // TODO: Change from "dfs" to iterative bfs
         // TODO: Don't return cells outside the board
-        public Vector2Int GetEmptyCell(Vector2Int seedPosition)
+        private Vector2Int GetEmptyCell(Vector2Int seedPosition)
         {
             if (Get(seedPosition) == null) return seedPosition;
 
-            Vector2Int[] neighbours = Hex.GetNeighbours(seedPosition);
-            Randomizer.Randomize(neighbours);
-
-            foreach (var position in neighbours)
+            Queue<Vector2Int> q = new Queue<Vector2Int>();
+            q.Enqueue(seedPosition);
+            while (q.Count > 0)
             {
-                if (Get(position) == null)
-                {
-                    return position;
-                }
+                var position = q.Dequeue();
+                if (Get(position) == null) return position;
+                var neighbours = Hex.GetNeighbours(seedPosition);
+                foreach (var neigh in neighbours)
+                    if (board.IsInside(neigh))
+                        q.Enqueue(neigh);
             }
-            return GetEmptyCell(neighbours[0]);
+            throw new Exception("Couldn't find an empty cell");
         }
 
         public List<Troop> SpawnWave(List<Troop> wave)

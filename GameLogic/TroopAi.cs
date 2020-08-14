@@ -20,13 +20,10 @@ namespace GameServer.GameLogic
         {
             if (board.IsOutside(troop.Position)) return true;
 
-            foreach (var cell in Hex.GetControllZone(troop.Position, troop.Orientation))
-            {
-                if (!board.IsOutside(cell))
-                {
+            foreach (var cell in troop.ControllZone)
+                if (board.IsInside(cell))
                     return false;
-                }
-            }
+
             return true;
         }
 
@@ -38,7 +35,8 @@ namespace GameServer.GameLogic
             int minDir = 0;
             for (int dir = -1; dir <= 1; dir += 2)
             {
-                Vector2Int neigh = Hex.GetAdjacentHex(troop.Position, (6 + dir + troop.Orientation) % 6);
+                int direction = (6 + dir + troop.Orientation) % 6;
+                Vector2Int neigh = Hex.GetAdjacentHex(troop.Position, direction);
                 if (troopMap.Get(neigh) != null) continue;
 
                 int dist = (target - neigh).SqrMagnitude;
