@@ -17,7 +17,7 @@ namespace GameServer.GameLogic
         private readonly IBattleResolver battleResolver;
         private readonly Waves waves;
         private readonly Board board;
-        private readonly TroopMap troopMap = new TroopMap();
+        private readonly TroopMap troopMap;
         private readonly MoveValidator validator;
         private readonly TroopAi troopAi;
 
@@ -27,6 +27,7 @@ namespace GameServer.GameLogic
             battleResolver = new StandardBattles();
             this.waves = waves;
             this.board = board;
+            troopMap = new TroopMap(board);
             validator = new MoveValidator(troopMap, board, activePlayer);
             troopAi = new TroopAi(troopMap, board);
         }
@@ -36,6 +37,7 @@ namespace GameServer.GameLogic
             this.battleResolver = battleResolver;
             this.waves = waves;
             this.board = board;
+            troopMap = new TroopMap(board);
             validator = new MoveValidator(troopMap, board, activePlayer);
             troopAi = new TroopAi(troopMap, board);
         }
@@ -144,12 +146,15 @@ namespace GameServer.GameLogic
 
         private TroopMovedEvent MoveTroop(Vector2Int position, int direction)
         {
-            Troop troop = troopMap.Get(position);
-            List<BattleResult> battleResults = new List<BattleResult>();
-
-            troop.MoveInDirection(direction);
             movePointsLeft--;
 
+            // Maybe remove position from troop? (kept in troopMap)
+            // Would also make sense on frontend (troopMap.AdjustPosition takes care of display)
+            // Animation not a problem
+            Troop troop = troopMap.Get(position);
+            troop.MoveInDirection(direction);
+
+            List<BattleResult> battleResults = new List<BattleResult>();
             Troop encounter = troopMap.Get(troop.Position);
             if (encounter == null)
             {
@@ -157,7 +162,7 @@ namespace GameServer.GameLogic
                 return new TroopMovedEvent(position, direction, battleResults);
             }
 
-            BattleResult result = new BattleResult(true, true);
+            BattleResult result = BattleResult.FriendlyCollision;
             if (encounter.Player != troop.Player)
                 result = battleResolver.GetFightResult(troop, encounter);
 
@@ -178,9 +183,7 @@ namespace GameServer.GameLogic
             }
 
             if (troop.Health > 0)
-            { 
                 troopMap.AdjustPosition(troop);
-            }
 
             return new TroopMovedEvent(position, direction, battleResults);
         }
@@ -194,7 +197,6 @@ namespace GameServer.GameLogic
                 movePointsLeft--;
 
             troop.ApplyDamage();
-
             if (troop.Health <= 0)
                 DestroyTroop(troop);
         }
@@ -202,7 +204,6 @@ namespace GameServer.GameLogic
         private void DestroyTroop(Troop troop)
         {
             troopMap.Remove(troop);
-
             if (troop.Player == activePlayer)
                 movePointsLeft -= troop.MovePoints;
         }
