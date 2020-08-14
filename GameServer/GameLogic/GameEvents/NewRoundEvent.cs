@@ -6,7 +6,7 @@ namespace GameServer.GameLogic.ServerEvents
 {
     public class NewRoundEvent : IGameEvent
     {
-        private List<Troop> troops;
+        private readonly List<Troop> troops;
 
         public NewRoundEvent(List<Troop> troops)
         {
