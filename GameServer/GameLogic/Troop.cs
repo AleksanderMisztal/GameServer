@@ -16,18 +16,6 @@ namespace GameServer.GameLogic
         public int Health { get; private set; }
 
 
-        //public Troop(TroopTemplate template)
-        //{
-        //    Player = template.player;
-        //    InitialMovePoints = template.movePoints;
-        //    MovePoints = template.movePoints;
-        //    Health = template.health;
-        //    Orientation = template.orientation;
-
-        //    Position = template.position;
-        //    StartingPosition = template.position;
-        //}
-
         public Troop(PlayerSide player, int movePoints, Vector2Int position, int orientation, int health)
         {
             Player = player;

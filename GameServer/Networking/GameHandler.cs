@@ -3,6 +3,7 @@ using GameServer.Utils;
 using GameServer.GameLogic;
 using System.Threading.Tasks;
 using GameServer.GameLogic.ServerEvents;
+using System;
 
 namespace GameServer.Networking
 {
@@ -42,6 +43,11 @@ namespace GameServer.Networking
 
         public static async Task MoveTroop(int client, Vector2Int position, int direction)
         {
+            if (direction < -1 || direction > 1)
+            {
+                Console.WriteLine($"Client {client} sent a move with illegal direction!");
+                return;
+            }
             Game game = clientToGame[client];
             List<IGameEvent> events = game.MakeMove(client, position, direction);
             foreach (var ev in events)
