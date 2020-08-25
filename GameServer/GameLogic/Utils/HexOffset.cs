@@ -3,9 +3,9 @@ using System.Linq;
 
 namespace GameServer.GameLogic.Utils
 {
-    class HexOffset
+    public class HexOffset
     {
-        private static readonly Vector2Int[] evenSteps = {
+        private static readonly Vector2Int[] EvenSteps = {
             new Vector2Int(1, 0),
             new Vector2Int(0, 1),
             new Vector2Int(-1, 1),
@@ -13,7 +13,7 @@ namespace GameServer.GameLogic.Utils
             new Vector2Int(-1, -1),
             new Vector2Int(0, -1)
         };
-        private static readonly Vector2Int[] oddSteps = {
+        private static readonly Vector2Int[] OddSteps = {
             new Vector2Int(1, 0),
             new Vector2Int(1, 1),
             new Vector2Int(0, 1),
@@ -26,7 +26,7 @@ namespace GameServer.GameLogic.Utils
         private readonly int y;
 
 
-        public HexOffset(int x, int y)
+        private HexOffset(int x, int y)
         {
             this.x = x;
             this.y = y;
@@ -34,8 +34,8 @@ namespace GameServer.GameLogic.Utils
 
         public HexOffset(Vector2Int v)
         {
-            this.x = v.X;
-            this.y = v.Y;
+            x = v.X;
+            y = v.Y;
         }
 
 
@@ -43,23 +43,15 @@ namespace GameServer.GameLogic.Utils
         {
             direction %= 6;
             while (direction < 0) direction += 6;
-            Vector2Int[] steps = (y & 1) == 1 ? oddSteps : evenSteps;
+            Vector2Int[] steps = (y & 1) == 1 ? OddSteps : EvenSteps;
             Vector2Int step = steps[direction % 6];
             return new HexOffset(x + step.X, y + step.Y);
         }
 
         public HexOffset[] GetNeighbors()
         {
-            Vector2Int[] steps = (y & 1) == 1 ? oddSteps : evenSteps;
+            Vector2Int[] steps = (y & 1) == 1 ? OddSteps : EvenSteps;
             return steps.Select(s => new HexOffset(x + s.X, y + s.Y)).ToArray();
-        }
-
-        public HexCube ToCube()
-        {
-            var q = x - (y - (y & 1)) / 2;
-            var r = y;
-            var s = -q - r;
-            return new HexCube(q, r, s);
         }
 
         public Vector2Int ToVector()

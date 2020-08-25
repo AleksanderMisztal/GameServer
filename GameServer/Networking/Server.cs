@@ -5,43 +5,27 @@ using System.Threading.Tasks;
 
 namespace GameServer.Networking
 {
-    class Server
+    public static class Server
     {
-        private static int nextClientId = 0;
-        public static Dictionary<int, Client> clients = new Dictionary<int, Client>();
+        private static int _nextClientId;
+        private static readonly Dictionary<int, Client> Clients = new Dictionary<int, Client>();
 
-        public delegate Task PacketHandler(int _fromClient, Packet _packet);
-        public static Dictionary<int, PacketHandler> packetHandlers;
-
-        public static void Start()
+        public delegate Task PacketHandler(int fromClient, Packet packet);
+        public static readonly Dictionary<int, PacketHandler> PacketHandlers= new Dictionary<int, PacketHandler>
         {
-            InitializePacketHandlers();
-        }
-
-        public static void Stop()
-        {
-            throw new NotImplementedException();
-            //for client in clients client.disconnect()
-        }
-
-        public static void InitializePacketHandlers()
-        {
-            packetHandlers = new Dictionary<int, PacketHandler>
-            {
-                {(int) ClientPackets.JoinGame, ServerHandle.JoinGame },
-                {(int) ClientPackets.MoveTroop, ServerHandle.MoveTroop },
-                {(int) ClientPackets.SendMessage, ServerHandle.SendMessage },
-            };
-        }
+            {(int) ClientPackets.JoinGame, ServerHandle.JoinGame },
+            {(int) ClientPackets.MoveTroop, ServerHandle.MoveTroop },
+            {(int) ClientPackets.SendMessage, ServerHandle.SendMessage },
+        };
 
         public static async Task ConnectNewClient(WebSocket socket)
         {
             Console.WriteLine("Connecting a new client");
 
-            Client client = new Client(nextClientId);
+            Client client = new Client(_nextClientId);
 
-            clients.Add(nextClientId, client);
-            nextClientId++;
+            Clients.Add(_nextClientId, client);
+            _nextClientId++;
 
             await client.wsClient.Connect(socket);
         }
@@ -50,7 +34,7 @@ namespace GameServer.Networking
         {
             try
             {
-                await clients[toClient].wsClient.SendData(packet);
+                await Clients[toClient].wsClient.SendData(packet);
             }
             catch (WebSocketException ex)
             {

@@ -1,6 +1,6 @@
 ﻿namespace GameServer.Networking
 {
-    class GameCycle
+    public static class GameCycle
     {
         public static void Update()
         {

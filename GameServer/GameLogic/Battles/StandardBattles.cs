@@ -4,17 +4,17 @@ namespace GameServer.GameLogic.Battles
 {
     public class StandardBattles : IBattleResolver
     {
-        private static readonly Random random = new Random();
+        private static readonly Random Random = new Random();
 
         public BattleResult GetFightResult(Troop attacker, Troop defender)
         {
             BattleResult battleResult = new BattleResult();
 
-            if (random.Next(0, 6) < 3)
+            if (Random.Next(0, 6) < 3)
             {
                 battleResult.DefenderDamaged = true;
             }
-            if (defender.InControlZone(attacker.StartingPosition) && random.Next(0, 6) < 3)
+            if (defender.InControlZone(attacker.StartingPosition) && Random.Next(0, 6) < 3)
             {
                 battleResult.AttackerDamaged = true;
             }
@@ -26,7 +26,7 @@ namespace GameServer.GameLogic.Battles
         {
             BattleResult battleResult = new BattleResult();
 
-            if (random.Next(0, 6) + random.Next(0, 6) == 10)
+            if (Random.Next(0, 6) + Random.Next(0, 6) == 10)
             {
                 battleResult.AttackerDamaged = true;
                 battleResult.DefenderDamaged = true;

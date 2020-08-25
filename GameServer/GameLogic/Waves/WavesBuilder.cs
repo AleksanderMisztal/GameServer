@@ -7,8 +7,8 @@ namespace GameServer.GameLogic.Waves
     {
         private readonly Dictionary<int, List<Troop>> troopsForRound = new Dictionary<int, List<Troop>>();
 
-        private int maxRedWave = 0;
-        private int maxBlueWave = 0;
+        private int maxRedWave;
+        private int maxBlueWave;
 
         public WavesBuilder Add(int round, int x, int y, PlayerSide player)
         {

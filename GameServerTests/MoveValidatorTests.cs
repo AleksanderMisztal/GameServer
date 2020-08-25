@@ -41,7 +41,7 @@ namespace GameServerTests
 
         private void OnTurnBegin(PlayerSide player)
         {
-            foreach (var troop in troopMap.GetTroops(player))
+            foreach (Troop troop in troopMap.GetTroops(player))
             {
                 troop.ResetMovePoints();
             }

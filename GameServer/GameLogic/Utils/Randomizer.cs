@@ -2,16 +2,16 @@
 
 namespace GameServer.GameLogic.Utils
 {
-    public class Randomizer
+    public static class Randomizer
     {
-        private static readonly Random rand = new Random();
+        private static readonly Random Rand = new Random();
 
         public static void Randomize<T>(T[] items)
         {
             
             for (int i = 0; i < items.Length - 1; i++)
             {
-                int j = rand.Next(i, items.Length);
+                int j = Rand.Next(i, items.Length);
                 T temp = items[i];
                 items[i] = items[j];
                 items[j] = temp;
@@ -20,7 +20,7 @@ namespace GameServer.GameLogic.Utils
 
         public static void RandomlyAssign<T>(T in1, T in2, out T out1, out T out2)
         {
-            if (rand.Next(2) == 0)
+            if (Rand.Next(2) == 0)
             {
                 out1 = in1;
                 out2 = in2;

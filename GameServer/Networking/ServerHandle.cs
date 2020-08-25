@@ -3,7 +3,7 @@ using GameServer.GameLogic.Utils;
 
 namespace GameServer.Networking
 {
-    class ServerHandle
+    public static class ServerHandle
     {
         public static async Task JoinGame(int fromClient, Packet packet)
         {

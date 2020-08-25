@@ -38,26 +38,26 @@ namespace GameServer.Networking
             readPos = 0;
         }
 
-        public Packet(int _id)
+        public Packet(int id)
         {
             buffer = new List<byte>();
             readPos = 0;
 
-            Write(_id);
+            Write(id);
         }
 
-        public Packet(byte[] _data)
+        public Packet(byte[] data)
         {
             buffer = new List<byte>();
             readPos = 0;
 
-            SetBytes(_data);
+            SetBytes(data);
         }
 
         #region Functions
-        public void SetBytes(byte[] _data)
+        public void SetBytes(byte[] data)
         {
-            Write(_data);
+            Write(data);
             readableBuffer = buffer.ToArray();
         }
 
@@ -66,9 +66,9 @@ namespace GameServer.Networking
             buffer.InsertRange(0, BitConverter.GetBytes(buffer.Count));
         }
 
-        public void InsertInt(int _value)
+        public void InsertInt(int value)
         {
-            buffer.InsertRange(0, BitConverter.GetBytes(_value));
+            buffer.InsertRange(0, BitConverter.GetBytes(value));
         }
 
         public byte[] ToArray()
@@ -87,9 +87,9 @@ namespace GameServer.Networking
             return Length() - readPos;
         }
 
-        public void Reset(bool _shouldReset = true)
+        public void Reset(bool shouldReset = true)
         {
-            if (_shouldReset)
+            if (shouldReset)
             {
                 buffer.Clear();
                 readableBuffer = null;
@@ -103,86 +103,86 @@ namespace GameServer.Networking
         #endregion
 
         #region Write Data
-        public void Write(byte _value)
+        public void Write(byte value)
         {
-            buffer.Add(_value);
+            buffer.Add(value);
         }
 
-        public void Write(byte[] _value)
+        public void Write(byte[] value)
         {
-            buffer.AddRange(_value);
+            buffer.AddRange(value);
         }
 
-        public void Write(short _value)
+        public void Write(short value)
         {
-            buffer.AddRange(BitConverter.GetBytes(_value));
+            buffer.AddRange(BitConverter.GetBytes(value));
         }
 
-        public void Write(int _value)
+        public void Write(int value)
         {
-            buffer.AddRange(BitConverter.GetBytes(_value));
+            buffer.AddRange(BitConverter.GetBytes(value));
         }
 
-        public void Write(long _value)
+        public void Write(long value)
         {
-            buffer.AddRange(BitConverter.GetBytes(_value));
+            buffer.AddRange(BitConverter.GetBytes(value));
         }
 
-        public void Write(float _value)
+        public void Write(float value)
         {
-            buffer.AddRange(BitConverter.GetBytes(_value));
+            buffer.AddRange(BitConverter.GetBytes(value));
         }
 
-        public void Write(bool _value)
+        public void Write(bool value)
         {
-            buffer.AddRange(BitConverter.GetBytes(_value));
+            buffer.AddRange(BitConverter.GetBytes(value));
         }
 
-        public void Write(string _value)
+        public void Write(string value)
         {
-            Write(_value.Length);
-            buffer.AddRange(Encoding.ASCII.GetBytes(_value));
+            Write(value.Length);
+            buffer.AddRange(Encoding.ASCII.GetBytes(value));
         }
 
-        public void Write(Vector2Int _value)
+        public void Write(Vector2Int value)
         {
-            Write(_value.X);
-            Write(_value.Y);
+            Write(value.X);
+            Write(value.Y);
         }
 
-        public void Write(Troop _value)
+        public void Write(Troop value)
         {
-            Write((int)_value.Player);
-            Write(_value.Health);
-            Write(_value.InitialMovePoints);
-            Write(_value.Orientation);
-            Write(_value.Position);
+            Write((int)value.Player);
+            Write(value.Health);
+            Write(value.InitialMovePoints);
+            Write(value.Orientation);
+            Write(value.Position);
         }
 
-        public void Write(BattleResult _value)
+        public void Write(BattleResult value)
         {
-            Write(_value.AttackerDamaged);
-            Write(_value.DefenderDamaged);
+            Write(value.AttackerDamaged);
+            Write(value.DefenderDamaged);
         }
 
-        public void Write(Board _value)
+        public void Write(Board value)
         {
-            Write(_value.xMax);
-            Write(_value.yMax);
+            Write(value.xMax);
+            Write(value.yMax);
         }
         #endregion
 
         #region Read Data
-        public byte ReadByte(bool _moveReadPos = true)
+        public byte ReadByte(bool moveReadPos = true)
         {
             if (buffer.Count > readPos)
             {
-                byte _value = readableBuffer[readPos];
-                if (_moveReadPos)
+                byte value = readableBuffer[readPos];
+                if (moveReadPos)
                 {
                     readPos += 1;
                 }
-                return _value;
+                return value;
             }
             else
             {
@@ -190,16 +190,16 @@ namespace GameServer.Networking
             }
         }
 
-        public byte[] ReadBytes(int _length, bool _moveReadPos = true)
+        public byte[] ReadBytes(int length, bool moveReadPos = true)
         {
             if (buffer.Count > readPos)
             {
-                byte[] _value = buffer.GetRange(readPos, _length).ToArray();
-                if (_moveReadPos)
+                byte[] value = buffer.GetRange(readPos, length).ToArray();
+                if (moveReadPos)
                 {
-                    readPos += _length;
+                    readPos += length;
                 }
-                return _value;
+                return value;
             }
             else
             {
@@ -207,16 +207,16 @@ namespace GameServer.Networking
             }
         }
 
-        public short ReadShort(bool _moveReadPos = true)
+        public short ReadShort(bool moveReadPos = true)
         {
             if (buffer.Count > readPos)
             {
-                short _value = BitConverter.ToInt16(readableBuffer, readPos);
-                if (_moveReadPos)
+                short value = BitConverter.ToInt16(readableBuffer, readPos);
+                if (moveReadPos)
                 {
                     readPos += 2;
                 }
-                return _value;
+                return value;
             }
             else
             {
@@ -224,16 +224,16 @@ namespace GameServer.Networking
             }
         }
 
-        public int ReadInt(bool _moveReadPos = true)
+        public int ReadInt(bool moveReadPos = true)
         {
             if (buffer.Count > readPos)
             {
-                int _value = BitConverter.ToInt32(readableBuffer, readPos);
-                if (_moveReadPos)
+                int value = BitConverter.ToInt32(readableBuffer, readPos);
+                if (moveReadPos)
                 {
                     readPos += 4;
                 }
-                return _value;
+                return value;
             }
             else
             {
@@ -241,16 +241,16 @@ namespace GameServer.Networking
             }
         }
 
-        public long ReadLong(bool _moveReadPos = true)
+        public long ReadLong(bool moveReadPos = true)
         {
             if (buffer.Count > readPos)
             {
-                long _value = BitConverter.ToInt64(readableBuffer, readPos);
-                if (_moveReadPos)
+                long value = BitConverter.ToInt64(readableBuffer, readPos);
+                if (moveReadPos)
                 {
                     readPos += 8;
                 }
-                return _value;
+                return value;
             }
             else
             {
@@ -258,16 +258,16 @@ namespace GameServer.Networking
             }
         }
 
-        public float ReadFloat(bool _moveReadPos = true)
+        public float ReadFloat(bool moveReadPos = true)
         {
             if (buffer.Count > readPos)
             {
-                float _value = BitConverter.ToSingle(readableBuffer, readPos);
-                if (_moveReadPos)
+                float value = BitConverter.ToSingle(readableBuffer, readPos);
+                if (moveReadPos)
                 {
                     readPos += 4;
                 }
-                return _value;
+                return value;
             }
             else
             {
@@ -275,16 +275,16 @@ namespace GameServer.Networking
             }
         }
 
-        public bool ReadBool(bool _moveReadPos = true)
+        public bool ReadBool(bool moveReadPos = true)
         {
             if (buffer.Count > readPos)
             {
-                bool _value = BitConverter.ToBoolean(readableBuffer, readPos);
-                if (_moveReadPos)
+                bool value = BitConverter.ToBoolean(readableBuffer, readPos);
+                if (moveReadPos)
                 {
                     readPos += 1;
                 }
-                return _value;
+                return value;
             }
             else
             {
@@ -292,17 +292,17 @@ namespace GameServer.Networking
             }
         }
 
-        public string ReadString(bool _moveReadPos = true)
+        public string ReadString(bool moveReadPos = true)
         {
             try
             {
-                int _length = ReadInt();
-                string _value = Encoding.ASCII.GetString(readableBuffer, readPos, _length);
-                if (_moveReadPos && _value.Length > 0)
+                int length = ReadInt();
+                string value = Encoding.ASCII.GetString(readableBuffer, readPos, length);
+                if (moveReadPos && value.Length > 0)
                 {
-                    readPos += _length;
+                    readPos += length;
                 }
-                return _value;
+                return value;
             }
             catch
             {
@@ -346,13 +346,13 @@ namespace GameServer.Networking
         }
         #endregion
 
-        private bool disposed = false;
+        private bool disposed;
 
-        protected virtual void Dispose(bool _disposing)
+        protected virtual void Dispose(bool disposing)
         {
             if (!disposed)
             {
-                if (_disposing)
+                if (disposing)
                 {
                     buffer = null;
                     readableBuffer = null;

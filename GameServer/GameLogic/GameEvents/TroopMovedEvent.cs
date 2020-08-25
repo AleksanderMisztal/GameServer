@@ -36,7 +36,7 @@ namespace GameServer.GameLogic.GameEvents
         public string GetString()
         {
             string res = $"Troop moved event\n p: {position} d: {direction}\n";
-            return battleResults.Aggregate(res, (current, b) => current + (b.ToString() + "\n"));
+            return battleResults.Aggregate(res, (current, b) => current + (b + "\n"));
         }
     }
 }

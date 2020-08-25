@@ -9,14 +9,14 @@ namespace GameServer.GameLogic
         private readonly Board board;
         private PlayerSide activePlayer;
 
-        public string Message { get; private set; } = null;
+        private string Message { get; set; }
 
 
         public MoveValidator(TroopMap map, Board board, PlayerSide player0)
         {
             this.map = map;
             this.board = board;
-            this.activePlayer = player0;
+            activePlayer = player0;
         }
 
         public void ToggleActivePlayer()
@@ -31,7 +31,7 @@ namespace GameServer.GameLogic
                 IsPlayersTurn(player);
                 PositionContainsTroop(position);
                 Troop troop = map.Get(position);
-                PlayerControllsTroop(player, troop);
+                PlayerControlsTroop(player, troop);
                 TroopHasMovePoints(troop);
                 NotEnteringFriendOrBlocked(troop, direction);
 
@@ -50,7 +50,7 @@ namespace GameServer.GameLogic
         private void IsPlayersTurn(PlayerSide player)
         {
             if (player != activePlayer)
-                throw new IllegalMoveException("Attempting to make a move in oponent's turn!");
+                throw new IllegalMoveException("Attempting to make a move in opponent's turn!");
         }
 
         private void PositionContainsTroop(Vector2Int position)
@@ -59,13 +59,13 @@ namespace GameServer.GameLogic
                 throw new IllegalMoveException("No troop at the specified hex!");
         }
 
-        private void PlayerControllsTroop(PlayerSide player, Troop troop)
+        private static void PlayerControlsTroop(PlayerSide player, Troop troop)
         {
             if (player != troop.Player)
                 throw new IllegalMoveException("Attempting to move enemy troop!");
         }
 
-        private void TroopHasMovePoints(Troop troop)
+        private static void TroopHasMovePoints(Troop troop)
         {
             if (troop.MovePoints <= 0)
                 throw new IllegalMoveException("Attempting to move a troop with no move points!");
@@ -79,7 +79,7 @@ namespace GameServer.GameLogic
             if (encounter == null || encounter.Player != troop.Player) return;
 
             // Tries to enter a friend so throw if has some other legal move
-            foreach (var cell in troop.ControllZone)
+            foreach (Vector2Int cell in troop.ControlZone)
             {
                 ThrowIfNotBlocked(troop, cell);
             }

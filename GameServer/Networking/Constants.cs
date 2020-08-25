@@ -1,8 +1,8 @@
 ﻿namespace GameServer.Networking
 {
-    class Constants
+    public static class Constants
     {
-        public const int TICKS_PER_SEC = 30;
-        public const int MS_PER_TICK = 1000 / 30;
+        public const int TicksPerSec = 30;
+        public const int MsPerTick = 1000 / 30;
     }
 }

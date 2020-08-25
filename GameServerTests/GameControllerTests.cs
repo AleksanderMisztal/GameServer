@@ -12,9 +12,7 @@ namespace GameServerTests
     [TestClass]
     public class GameControllerTests
     {
-        private const int RIGHT = -1;
-        private const int FORWARD = 0;
-        private const int LEFT = 1;
+        private const int Forward = 0;
 
         private GameController gc;
 
@@ -29,13 +27,13 @@ namespace GameServerTests
 
         private List<IGameEvent> Move(PlayerSide player, int x, int y, int direction)
         {
-            var events = gc.ProcessMove(player, new Vector2Int(x, y), direction);
+            List<IGameEvent> events = gc.ProcessMove(player, new Vector2Int(x, y), direction);
             return events;
         }
 
         private void LogEvents(List<IGameEvent> events)
         {
-            foreach (var ev in events) Trace.WriteLine(ev.GetString());
+            foreach (IGameEvent ev in events) Trace.WriteLine(ev.GetString());
             Trace.WriteLine("");
         }
 
@@ -51,12 +49,12 @@ namespace GameServerTests
 
             CreateGameController(waves, 10, 10);
 
-            Move(PlayerSide.Blue, 3, 3, FORWARD);
-            Move(PlayerSide.Blue, 4, 3, FORWARD);
-            Move(PlayerSide.Blue, 6, 3, FORWARD);
-            Move(PlayerSide.Blue, 2, 3, FORWARD);
-            Move(PlayerSide.Blue, 3, 3, FORWARD);
-            var events = Move(PlayerSide.Blue, 4, 3, FORWARD);
+            Move(PlayerSide.Blue, 3, 3, Forward);
+            Move(PlayerSide.Blue, 4, 3, Forward);
+            Move(PlayerSide.Blue, 6, 3, Forward);
+            Move(PlayerSide.Blue, 2, 3, Forward);
+            Move(PlayerSide.Blue, 3, 3, Forward);
+            List<IGameEvent> events = Move(PlayerSide.Blue, 4, 3, Forward);
 
             Assert.AreEqual("Game ended event\nRed: 2, blue: 2", events[1].GetString());
         }
@@ -73,12 +71,12 @@ namespace GameServerTests
 
             CreateGameController(waves, 10, 10);
 
-            Move(PlayerSide.Blue, 3, 3, FORWARD);
-            Move(PlayerSide.Blue, 4, 3, FORWARD);
-            Move(PlayerSide.Blue, 6, 3, FORWARD);
-            Move(PlayerSide.Blue, 2, 3, FORWARD);
-            Move(PlayerSide.Blue, 3, 3, FORWARD);
-            var events = Move(PlayerSide.Blue, 4, 3, FORWARD);
+            Move(PlayerSide.Blue, 3, 3, Forward);
+            Move(PlayerSide.Blue, 4, 3, Forward);
+            Move(PlayerSide.Blue, 6, 3, Forward);
+            Move(PlayerSide.Blue, 2, 3, Forward);
+            Move(PlayerSide.Blue, 3, 3, Forward);
+            List<IGameEvent> events = Move(PlayerSide.Blue, 4, 3, Forward);
 
             Assert.AreEqual(1, events.Count);
         }
@@ -93,7 +91,7 @@ namespace GameServerTests
 
             CreateGameController(waves, 5, 5);
 
-            var events = Move(PlayerSide.Blue, 4, 3, FORWARD);
+            List<IGameEvent> events = Move(PlayerSide.Blue, 4, 3, Forward);
 
             Assert.IsTrue(events.Count == 5);
         }
@@ -111,7 +109,7 @@ namespace GameServerTests
 
             CreateGameController(waves, 10, 10);
 
-            var events = Move(PlayerSide.Blue, 0, 3, FORWARD);
+            List<IGameEvent> events = Move(PlayerSide.Blue, 0, 3, Forward);
 
             Assert.AreEqual(events.Count, 1);
         }

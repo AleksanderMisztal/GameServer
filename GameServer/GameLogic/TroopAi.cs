@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+﻿using System.Linq;
 using GameServer.GameLogic.Utils;
 
 namespace GameServer.GameLogic
@@ -15,15 +15,10 @@ namespace GameServer.GameLogic
         }
 
 
-        public bool ShouldControll(Troop troop)
+        public bool ShouldControl(Troop troop)
         {
-            if (board.IsOutside(troop.Position)) return true;
-
-            foreach (var cell in troop.ControllZone)
-                if (board.IsInside(cell))
-                    return false;
-
-            return true;
+            return board.IsOutside(troop.Position) 
+                   || troop.ControlZone.All(cell => !board.IsInside(cell));
         }
 
         public int GetOptimalDirection(Troop troop)

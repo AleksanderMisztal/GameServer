@@ -27,7 +27,7 @@ namespace GameServer.GameLogic
             return !IsOutside(p);
         }
 
-        public static readonly Board standard = new Board(20, 12);
-        public static readonly Board test = new Board(8, 5);
+        public static readonly Board Standard = new Board(20, 12);
+        public static readonly Board Test = new Board(8, 5);
     }
 }

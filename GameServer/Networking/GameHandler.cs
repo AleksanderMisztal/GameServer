@@ -10,34 +10,34 @@ namespace GameServer.Networking
 {
     public static class GameHandler
     {
-        private static readonly Dictionary<int, Game> clientToGame = new Dictionary<int, Game>();
+        private static readonly Dictionary<int, Game> ClientToGame = new Dictionary<int, Game>();
 
-        private static bool someoneWaiting = false;
-        private static User waitingUser;
+        private static bool _someoneWaiting;
+        private static User _waitingUser;
 
         public static async Task SendToGame(User newUser)
         {
-            if (someoneWaiting)
+            if (_someoneWaiting)
             {
-                someoneWaiting = false;
-                Randomizer.RandomlyAssign(newUser, waitingUser, out User redUser, out User blueUser);
+                _someoneWaiting = false;
+                Randomizer.RandomlyAssign(newUser, _waitingUser, out User redUser, out User blueUser);
                 await InitializeNewGame(redUser, blueUser);
             }
             else
             {
-                someoneWaiting = true;
-                waitingUser = newUser;
+                _someoneWaiting = true;
+                _waitingUser = newUser;
             }
         }
 
         private static async Task InitializeNewGame(User playingRed, User playingBlue)
         {
             Waves waves = Waves.Basic();
-            Board board = Board.standard;
+            Board board = Board.Standard;
             Game game = new Game(playingRed, playingBlue, board, waves);
 
-            clientToGame[playingRed.id] = game;
-            clientToGame[playingBlue.id] = game;
+            ClientToGame[playingRed.id] = game;
+            ClientToGame[playingBlue.id] = game;
 
             await game.Initialize();
         }
@@ -49,9 +49,9 @@ namespace GameServer.Networking
                 Console.WriteLine($"Client {client} sent a move with illegal direction!");
                 return;
             }
-            Game game = clientToGame[client];
+            Game game = ClientToGame[client];
             List<IGameEvent> events = game.MakeMove(client, position, direction);
-            foreach (var ev in events)
+            foreach (IGameEvent ev in events)
             {
                 await ServerSend.GameEvent(game.blueUser.id, ev);
                 await ServerSend.GameEvent(game.redUser.id, ev);
@@ -60,28 +60,28 @@ namespace GameServer.Networking
 
         public static async Task SendMessage(int client, string message)
         {
-            int oponent = GetOpponent(client);
-            await ServerSend.MessageSent(oponent, message);
+            int opponent = GetOpponent(client);
+            await ServerSend.MessageSent(opponent, message);
         }
 
         public static async Task ClientDisconnected(int client)
         {
-            if (someoneWaiting && client == waitingUser.id)
-                someoneWaiting = false;
+            if (_someoneWaiting && client == _waitingUser.id)
+                _someoneWaiting = false;
 
-            int oponent = GetOpponent(client);
+            int opponent = GetOpponent(client);
 
-            clientToGame.Remove(client);
-            clientToGame.Remove(oponent);
+            ClientToGame.Remove(client);
+            ClientToGame.Remove(opponent);
 
-            await ServerSend.OpponentDisconnected(oponent);
+            await ServerSend.OpponentDisconnected(opponent);
         }
 
         private static int GetOpponent(int client)
         {
-            Game game = clientToGame[client];
-            int oponentId = game.blueUser.id ^ game.redUser.id ^ client;
-            return oponentId;
+            Game game = ClientToGame[client];
+            int opponentId = game.blueUser.id ^ game.redUser.id ^ client;
+            return opponentId;
         }
     }
 }

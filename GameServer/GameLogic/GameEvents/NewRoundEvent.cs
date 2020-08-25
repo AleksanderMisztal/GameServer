@@ -29,7 +29,7 @@ namespace GameServer.GameLogic.GameEvents
         public string GetString()
         {
             StringBuilder sb = new StringBuilder("New round event\n");
-            foreach (var t in troops) sb.Append(t).Append("\n");
+            foreach (Troop t in troops) sb.Append(t).Append("\n");
             return sb.ToString();
         }
     }

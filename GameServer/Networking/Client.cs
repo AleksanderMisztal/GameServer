@@ -8,22 +8,20 @@ using System.Threading.Tasks;
 
 namespace GameServer.Networking
 {
-    class Client
+    public class Client
     {
-        public int id;
-        public WsClient wsClient;
+        public readonly WsClient wsClient;
 
-        public Client(int _clientId)
+        public Client(int clientId)
         {
-            id = _clientId;
-            wsClient = new WsClient(id);
+            wsClient = new WsClient(clientId);
         }
 
         public class WsClient
         {
             private readonly int id;
-            public WebSocket socket;
-            private bool isConnected = false;
+            private WebSocket socket;
+            private bool isConnected;
 
             public WsClient(int id)
             {
@@ -44,7 +42,7 @@ namespace GameServer.Networking
             private async Task<byte[]> Receive()
             {
                 ArraySegment<byte> buffer = new ArraySegment<byte>(new byte[4 * 1024]);
-                var memoryStream = new MemoryStream();
+                MemoryStream memoryStream = new MemoryStream();
                 WebSocketReceiveResult result;
 
                 do
@@ -55,25 +53,23 @@ namespace GameServer.Networking
 
                 memoryStream.Seek(0, SeekOrigin.Begin);
 
-                if (result.MessageType != WebSocketMessageType.Close)
+                if (result.MessageType == WebSocketMessageType.Close) return null;
+                using StreamReader reader = new StreamReader(memoryStream, Encoding.UTF8);
+                string bytes = reader.ReadToEnd();
+                try
                 {
-                    using var reader = new StreamReader(memoryStream, Encoding.UTF8);
-                    string bytes = reader.ReadToEnd();
-                    try
-                    {
-                        return Serializer.Deserialize(bytes);
-                    }
-                    catch
-                    {
-                        Console.WriteLine("Couldn't convert to bytes");
-                    }
+                    return Serializer.Deserialize(bytes);
+                }
+                catch
+                {
+                    Console.WriteLine("Couldn't convert to bytes");
                 }
                 return null;
             }
 
             private async Task BeginReceive()
             {
-                byte[] data = null;
+                byte[] data;
                 try
                 {
                     data = await Receive();
@@ -98,7 +94,7 @@ namespace GameServer.Networking
                     Console.WriteLine($"Received a packet of type {packetType}");
                     try
                     {
-                        await Server.packetHandlers[packetType](id, packet);
+                        await Server.PacketHandlers[packetType](id, packet);
                     }
                     catch (KeyNotFoundException)
                     {
@@ -109,7 +105,7 @@ namespace GameServer.Networking
 
             public async Task SendData(Packet packet)
             {
-                var buffer = new ArraySegment<byte>(Encoding.UTF8.GetBytes(Serializer.Serialize(packet.ToArray())));
+                ArraySegment<byte> buffer = new ArraySegment<byte>(Encoding.UTF8.GetBytes(Serializer.Serialize(packet.ToArray())));
                 await socket.SendAsync(buffer, WebSocketMessageType.Binary, true, CancellationToken.None);
             }
         }

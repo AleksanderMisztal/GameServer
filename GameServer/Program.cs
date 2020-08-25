@@ -23,26 +23,24 @@ namespace GameServer
 
         private static void StartServer()
         {
-            Thread mainThread = new Thread(new ThreadStart(MainThread));
+            Thread mainThread = new Thread(MainThread);
             mainThread.Start();
-
-            Server.Start();
         }
 
         private static void MainThread()
         {
-            Console.WriteLine($"Main thread started. Running at {Constants.TICKS_PER_SEC} ticks per second.");
-            DateTime _nextLoop = DateTime.Now;
+            Console.WriteLine($"Main thread started. Running at {Constants.TicksPerSec} ticks per second.");
+            DateTime nextLoop = DateTime.Now;
             while (true)
             {
-                if (_nextLoop < DateTime.Now)
+                if (nextLoop < DateTime.Now)
                 {
                     GameCycle.Update();
-                    _nextLoop = _nextLoop.AddMilliseconds(Constants.MS_PER_TICK);
+                    nextLoop = nextLoop.AddMilliseconds(Constants.MsPerTick);
                 }
                 else
                 {
-                    int milliseconds = (int)(_nextLoop - DateTime.Now).TotalMilliseconds;
+                    int milliseconds = (int)(nextLoop - DateTime.Now).TotalMilliseconds;
                     Thread.Sleep(Math.Max(milliseconds, 0));
                 }
             }

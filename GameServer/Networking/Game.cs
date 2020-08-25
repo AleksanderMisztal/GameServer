@@ -14,7 +14,7 @@ namespace GameServer.Networking
         private readonly Board board;
         private readonly Waves waves;
 
-        private GameController controller = null;
+        private GameController controller;
 
         public Game(User redUser, User blueUser, Board board, Waves waves)
         {
@@ -27,7 +27,7 @@ namespace GameServer.Networking
         public List<IGameEvent> MakeMove(int client, Vector2Int position, int direction)
         {
             PlayerSide player = GetColor(client);
-            var events = controller.ProcessMove(player, position, direction);
+            List<IGameEvent> events = controller.ProcessMove(player, position, direction);
             return events;
         }
 
@@ -47,7 +47,7 @@ namespace GameServer.Networking
             await ServerSend.GameJoined(redUser.id, blueUser.name, PlayerSide.Red, board);
             await ServerSend.GameJoined(blueUser.id, redUser.name, PlayerSide.Blue, board);
 
-            var ev = controller.InitializeAndReturnEvent();
+            NewRoundEvent ev = controller.InitializeAndReturnEvent();
             await ServerSend.GameEvent(redUser.id, ev);
             await ServerSend.GameEvent(blueUser.id, ev);
         }

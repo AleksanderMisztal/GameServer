@@ -1,4 +1,5 @@
-﻿using GameServer.GameLogic.Utils;
+﻿using System.Linq;
+using GameServer.GameLogic.Utils;
 
 namespace GameServer.GameLogic
 {
@@ -50,15 +51,11 @@ namespace GameServer.GameLogic
                 MovePoints--;
         }
 
-        public Vector2Int[] ControllZone => Hex.GetControllZone(Position, Orientation);
+        public Vector2Int[] ControlZone => Hex.GetControlZone(Position, Orientation);
 
         public bool InControlZone(Vector2Int position)
         {
-            foreach (var cell in ControllZone)
-                if (cell == position)
-                    return true;
-
-            return false;
+            return ControlZone.Any(cell => cell == position);
         }
 
         public void ResetMovePoints()
@@ -67,7 +64,7 @@ namespace GameServer.GameLogic
         }
 
 
-        // Factories
+        #region Factories
         public static Troop Red(int x, int y)
         {
             return new Troop(PlayerSide.Red, 5, new Vector2Int(x, y), 3, 2);
@@ -97,6 +94,6 @@ namespace GameServer.GameLogic
         {
             return new Troop(PlayerSide.Blue, 5, position, orientation, 2);
         }
-
+        #endregion
     }
 }

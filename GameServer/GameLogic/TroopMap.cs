@@ -57,10 +57,10 @@ namespace GameServer.GameLogic
             q.Enqueue(seedPosition);
             while (q.Count > 0)
             {
-                var position = q.Dequeue();
+                Vector2Int position = q.Dequeue();
                 if (Get(position) == null) return position;
-                var neighbours = Hex.GetNeighbours(seedPosition);
-                foreach (var neigh in neighbours)
+                Vector2Int[] neighbours = Hex.GetNeighbours(seedPosition);
+                foreach (Vector2Int neigh in neighbours)
                     if (board.IsInside(neigh))
                         q.Enqueue(neigh);
             }
@@ -69,7 +69,7 @@ namespace GameServer.GameLogic
 
         public List<Troop> SpawnWave(List<Troop> wave)
         {
-            foreach (var troop in wave)
+            foreach (Troop troop in wave)
             {
                 troop.Position = GetEmptyCell(troop.Position);
                 Add(troop);

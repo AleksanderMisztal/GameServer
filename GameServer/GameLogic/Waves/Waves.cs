@@ -5,7 +5,7 @@ namespace GameServer.GameLogic.Waves
 {
     public class Waves
     {
-        public readonly Dictionary<int, List<Troop>> troopsForRound;
+        private readonly Dictionary<int, List<Troop>> troopsForRound;
 
         public readonly int maxRedWave;
         public readonly int maxBlueWave;
@@ -43,7 +43,7 @@ namespace GameServer.GameLogic.Waves
                 Troop.Blue(new Vector2Int(2, 2)),
             };
 
-            var troopsForRound = new Dictionary<int, List<Troop>>
+            Dictionary<int, List<Troop>> troopsForRound = new Dictionary<int, List<Troop>>
             {
                 {1, wave1 },
                 {3, wave3 },
@@ -97,7 +97,7 @@ namespace GameServer.GameLogic.Waves
                 Troop.Red(16, 7),
             };
 
-            var troopsForRound = new Dictionary<int, List<Troop>>
+            Dictionary<int, List<Troop>> troopsForRound = new Dictionary<int, List<Troop>>
             {
                 {1, wave1 },
                 {3, wave3 },

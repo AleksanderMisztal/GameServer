@@ -48,7 +48,7 @@ namespace GameServerTests
 
             Troop troop = GetTroop(2, 2);
 
-            Assert.IsFalse(troopAi.ShouldControll(troop));
+            Assert.IsFalse(troopAi.ShouldControl(troop));
         }
 
         [TestMethod]
@@ -63,7 +63,7 @@ namespace GameServerTests
 
             Troop troop = GetTroop(3, 5);
 
-            Assert.IsFalse(troopAi.ShouldControll(troop));
+            Assert.IsFalse(troopAi.ShouldControl(troop));
         }
 
         [TestMethod]
@@ -75,7 +75,7 @@ namespace GameServerTests
             DoAddTroops();
             Troop troop = GetTroop(5, 5);
 
-            Assert.IsTrue(troopAi.ShouldControll(troop));
+            Assert.IsTrue(troopAi.ShouldControl(troop));
         }
 
         [TestMethod]
@@ -88,7 +88,7 @@ namespace GameServerTests
 
             Troop troop = GetTroop(8, 9);
 
-            Assert.IsTrue(troopAi.ShouldControll(troop));
+            Assert.IsTrue(troopAi.ShouldControl(troop));
         }
 
         [TestMethod]
@@ -101,7 +101,7 @@ namespace GameServerTests
 
             Troop troop = GetTroop(3, 6);
 
-            Assert.IsTrue(troopAi.ShouldControll(troop));
+            Assert.IsTrue(troopAi.ShouldControl(troop));
         }
     }
 }

@@ -2,8 +2,8 @@
 {
     public class Score
     {
-        public int Red { get; private set; } = 0;
-        public int Blue { get; private set; } = 0;
+        public int Red { get; private set; }
+        public int Blue { get; private set; }
 
         public void Increment(PlayerSide player)
         {

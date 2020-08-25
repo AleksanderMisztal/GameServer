@@ -3,43 +3,38 @@ using System.Collections.Generic;
 
 namespace GameServer.Networking
 {
-    public class ThreadManager
+    public static class ThreadManager
     {
-        private static readonly List<Action> executeOnMainThread = new List<Action>();
-        private static readonly List<Action> executeCopiedOnMainThread = new List<Action>();
-        private static bool actionToExecuteOnMainThread = false;
+        private static readonly List<Action> ToExecuteOnMainThread = new List<Action>();
+        private static readonly List<Action> ExecuteCopiedOnMainThread = new List<Action>();
+        private static bool _actionToExecuteOnMainThread;
 
-        public static void ExecuteOnMainThread(Action _action)
+        public static void ExecuteOnMainThread(Action action)
         {
-            if (_action == null)
+            if (action == null)
             {
                 return;
             }
 
-            lock (executeOnMainThread)
+            lock (ToExecuteOnMainThread)
             {
-                executeOnMainThread.Add(_action);
-                actionToExecuteOnMainThread = true;
+                ToExecuteOnMainThread.Add(action);
+                _actionToExecuteOnMainThread = true;
             }
         }
 
         public static void UpdateMain()
         {
-            if (actionToExecuteOnMainThread)
+            if (!_actionToExecuteOnMainThread) return;
+            ExecuteCopiedOnMainThread.Clear();
+            lock (ToExecuteOnMainThread)
             {
-                executeCopiedOnMainThread.Clear();
-                lock (executeOnMainThread)
-                {
-                    executeCopiedOnMainThread.AddRange(executeOnMainThread);
-                    executeOnMainThread.Clear();
-                    actionToExecuteOnMainThread = false;
-                }
-
-                for (int i = 0; i < executeCopiedOnMainThread.Count; i++)
-                {
-                    executeCopiedOnMainThread[i]();
-                }
+                ExecuteCopiedOnMainThread.AddRange(ToExecuteOnMainThread);
+                ToExecuteOnMainThread.Clear();
+                _actionToExecuteOnMainThread = false;
             }
+
+            foreach (Action t in ExecuteCopiedOnMainThread) t();
         }
     }
 }
