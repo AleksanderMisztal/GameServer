@@ -1,8 +1,9 @@
 ﻿using GameServer.GameLogic;
-using GameServer.Utils;
+using GameServer.GameLogic.Utils;
+using GameServer.GameLogic.Waves;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace GameTests
+namespace GameServerTests
 {
     [TestClass]
     public class MoveValidatorTests

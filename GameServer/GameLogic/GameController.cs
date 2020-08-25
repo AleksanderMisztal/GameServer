@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Linq;
 using System.Collections.Generic;
-using GameServer.Utils;
-using GameServer.GameLogic.ServerEvents;
+using GameServer.GameLogic.Battles;
+using GameServer.GameLogic.GameEvents;
+using GameServer.GameLogic.Utils;
 
 namespace GameServer.GameLogic
 {
@@ -15,14 +16,14 @@ namespace GameServer.GameLogic
         private readonly Score score = new Score();
 
         private readonly IBattleResolver battleResolver;
-        private readonly Waves waves;
+        private readonly Waves.Waves waves;
         private readonly Board board;
         private readonly TroopMap troopMap;
         private readonly MoveValidator validator;
         private readonly TroopAi troopAi;
 
 
-        public GameController(Waves waves, Board board)
+        public GameController(Waves.Waves waves, Board board)
         {
             battleResolver = new StandardBattles();
             this.waves = waves;
@@ -32,7 +33,7 @@ namespace GameServer.GameLogic
             troopAi = new TroopAi(troopMap, board);
         }
 
-        public GameController(IBattleResolver battleResolver, Board board, Waves waves)
+        public GameController(IBattleResolver battleResolver, Board board, Waves.Waves waves)
         {
             this.battleResolver = battleResolver;
             this.waves = waves;

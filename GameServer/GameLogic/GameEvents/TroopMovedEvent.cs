@@ -1,14 +1,16 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
+using GameServer.GameLogic.Battles;
+using GameServer.GameLogic.Utils;
 using GameServer.Networking;
-using GameServer.Utils;
 
-namespace GameServer.GameLogic.ServerEvents
+namespace GameServer.GameLogic.GameEvents
 {
     public class TroopMovedEvent : IGameEvent
     {
-        private Vector2Int position;
-        private int direction;
-        private List<BattleResult> battleResults;
+        private readonly Vector2Int position;
+        private readonly int direction;
+        private readonly List<BattleResult> battleResults;
 
         public TroopMovedEvent(Vector2Int position, int direction, List<BattleResult> battleResults)
         {
@@ -25,8 +27,8 @@ namespace GameServer.GameLogic.ServerEvents
             packet.Write(direction);
 
             packet.Write(battleResults.Count);
-            for (int i = 0; i < battleResults.Count; i++)
-                packet.Write(battleResults[i]);
+            foreach (BattleResult result in battleResults)
+                packet.Write(result);
 
             return packet;
         }
@@ -34,8 +36,7 @@ namespace GameServer.GameLogic.ServerEvents
         public string GetString()
         {
             string res = $"Troop moved event\n p: {position} d: {direction}\n";
-            foreach (var b in battleResults) res += b.ToString() + "\n";
-            return res;
+            return battleResults.Aggregate(res, (current, b) => current + (b.ToString() + "\n"));
         }
     }
 }

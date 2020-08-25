@@ -1,4 +1,4 @@
-﻿namespace GameServer.Utils
+﻿namespace GameServer.GameLogic.Utils
 {
     class Vector3Int
     {

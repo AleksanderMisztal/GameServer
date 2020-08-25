@@ -2,7 +2,8 @@
 using System.Collections.Generic;
 using System.Text;
 using GameServer.GameLogic;
-using GameServer.Utils;
+using GameServer.GameLogic.Battles;
+using GameServer.GameLogic.Utils;
 
 namespace GameServer.Networking
 {

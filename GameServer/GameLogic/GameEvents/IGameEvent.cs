@@ -1,6 +1,6 @@
 ﻿using GameServer.Networking;
 
-namespace GameServer.GameLogic.ServerEvents
+namespace GameServer.GameLogic.GameEvents
 {
     public interface IGameEvent
     {

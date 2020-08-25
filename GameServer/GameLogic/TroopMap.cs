@@ -1,6 +1,6 @@
-﻿using GameServer.Utils;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using GameServer.GameLogic.Utils;
 
 namespace GameServer.GameLogic
 {

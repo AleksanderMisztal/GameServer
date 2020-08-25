@@ -5,8 +5,6 @@ using System.Net.WebSockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using GameServer.GameLogic.ServerEvents;
-using GameServer.Utils;
 
 namespace GameServer.Networking
 {
@@ -97,6 +95,7 @@ namespace GameServer.Networking
                 {
                     using Packet packet = new Packet(data);
                     int packetType = packet.ReadInt();
+                    Console.WriteLine($"Received a packet of type {packetType}");
                     try
                     {
                         await Server.packetHandlers[packetType](id, packet);

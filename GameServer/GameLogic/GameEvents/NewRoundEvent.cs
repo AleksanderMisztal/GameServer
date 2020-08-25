@@ -1,8 +1,8 @@
-﻿using GameServer.Networking;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Text;
+using GameServer.Networking;
 
-namespace GameServer.GameLogic.ServerEvents
+namespace GameServer.GameLogic.GameEvents
 {
     public class NewRoundEvent : IGameEvent
     {

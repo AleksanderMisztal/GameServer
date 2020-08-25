@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace GameServer.Utils
+namespace GameServer.GameLogic.Utils
 {
     public class Randomizer
     {

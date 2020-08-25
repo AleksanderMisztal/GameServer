@@ -1,4 +1,4 @@
-﻿namespace GameServer.Utils
+﻿namespace GameServer.GameLogic.Utils
 {
     public class Vector2Int
     {
@@ -12,12 +12,6 @@
         {
             X = x;
             Y = y;
-        }
-
-        public Vector2Int()
-        {
-            X = 0;
-            Y = 0;
         }
 
         public override int GetHashCode()

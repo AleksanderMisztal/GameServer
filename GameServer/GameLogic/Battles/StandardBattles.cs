@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace GameServer.GameLogic
+namespace GameServer.GameLogic.Battles
 {
     public class StandardBattles : IBattleResolver
     {

@@ -1,4 +1,4 @@
-﻿using GameServer.Utils;
+﻿using GameServer.GameLogic.Utils;
 
 namespace GameServer.GameLogic
 {

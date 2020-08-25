@@ -1,5 +1,5 @@
 ﻿using System.Threading.Tasks;
-using GameServer.Utils;
+using GameServer.GameLogic.Utils;
 
 namespace GameServer.Networking
 {

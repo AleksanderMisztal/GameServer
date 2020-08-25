@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Linq;
-using GameServer.Utils;
 
-namespace GameServer.Utils
+namespace GameServer.GameLogic.Utils
 {
     class HexOffset
     {
@@ -42,6 +41,8 @@ namespace GameServer.Utils
 
         public HexOffset GetAdjacentHex(int direction)
         {
+            direction %= 6;
+            while (direction < 0) direction += 6;
             Vector2Int[] steps = (y & 1) == 1 ? oddSteps : evenSteps;
             Vector2Int step = steps[direction % 6];
             return new HexOffset(x + step.X, y + step.Y);

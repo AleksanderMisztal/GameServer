@@ -1,8 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using GameServer.GameLogic;
-using GameServer.GameLogic.ServerEvents;
-using GameServer.Utils;
+using GameServer.GameLogic.GameEvents;
+using GameServer.GameLogic.Utils;
+using GameServer.GameLogic.Waves;
 
 namespace GameServer.Networking
 {

@@ -1,4 +1,4 @@
-﻿namespace GameServer.GameLogic
+﻿namespace GameServer.GameLogic.Battles
 {
     public class BattleResult
     {

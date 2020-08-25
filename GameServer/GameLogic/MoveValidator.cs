@@ -1,5 +1,5 @@
-﻿using GameServer.Utils;
-using System.Diagnostics;
+﻿using System;
+using GameServer.GameLogic.Utils;
 
 namespace GameServer.GameLogic
 {
@@ -41,7 +41,7 @@ namespace GameServer.GameLogic
             catch (IllegalMoveException ex)
             {
                 Message = ex.Message;
-                Trace.WriteLine(Message);
+                Console.WriteLine(Message);
                 return false;
             }
         }

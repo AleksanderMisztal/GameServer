@@ -1,12 +1,13 @@
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
 using System.Diagnostics;
-using GameServer.Utils;
 using GameServer.GameLogic;
 using GameServer.GameLogic.Battles;
-using GameServer.GameLogic.ServerEvents;
+using GameServer.GameLogic.GameEvents;
+using GameServer.GameLogic.Utils;
+using GameServer.GameLogic.Waves;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace GameTests
+namespace GameServerTests
 {
     [TestClass]
     public class GameControllerTests
