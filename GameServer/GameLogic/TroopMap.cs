@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text;
 using GameServer.GameLogic.Utils;
 
 namespace GameServer.GameLogic
@@ -81,6 +82,14 @@ namespace GameServer.GameLogic
         {
             map.Add(troop.Position, troop);
             GetTroops(troop.Player).Add(troop);
+        }
+
+        public void LogTroops()
+        {
+            StringBuilder sb = new StringBuilder();
+            foreach (Troop troop in map.Values) 
+                sb.Append($"{troop.Position}, {troop.Player}\n");
+            Console.WriteLine(sb);
         }
     }
 }

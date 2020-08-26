@@ -47,6 +47,7 @@ namespace GameServer.Networking
             await ServerSend.GameJoined(redUser.id, blueUser.name, PlayerSide.Red, board);
             await ServerSend.GameJoined(blueUser.id, redUser.name, PlayerSide.Blue, board);
 
+            // TODO: Construct one event and use for both clients (in other uses too)
             NewRoundEvent ev = controller.InitializeAndReturnEvent();
             await ServerSend.GameEvent(redUser.id, ev);
             await ServerSend.GameEvent(blueUser.id, ev);

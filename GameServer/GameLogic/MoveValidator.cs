@@ -8,8 +8,7 @@ namespace GameServer.GameLogic
         private readonly TroopMap map;
         private readonly Board board;
         private PlayerSide activePlayer;
-
-        private string Message { get; set; }
+        private string message;
 
 
         public MoveValidator(TroopMap map, Board board, PlayerSide player0)
@@ -35,13 +34,20 @@ namespace GameServer.GameLogic
                 TroopHasMovePoints(troop);
                 NotEnteringFriendOrBlocked(troop, direction);
 
-                Message = "Move is valid.";
+                message = "Move is valid.";
                 return true;
             }
             catch (IllegalMoveException ex)
             {
-                Message = ex.Message;
-                Console.WriteLine(Message);
+                message = ex.Message;
+                Console.WriteLine(message);
+                Console.WriteLine($"Pos: {position}, dir: {direction}");
+                Troop troop;
+                if ((troop = map.Get(position)) != null)
+                {
+                    Console.WriteLine($"Target: {Hex.GetAdjacentHex(position, troop.Orientation + direction)}");
+                }
+                map.LogTroops();
                 return false;
             }
         }
@@ -73,7 +79,7 @@ namespace GameServer.GameLogic
 
         private void NotEnteringFriendOrBlocked(Troop troop, int direction)
         {
-            Vector2Int targetPosition = Hex.GetAdjacentHex(troop.Position, direction);
+            Vector2Int targetPosition = Hex.GetAdjacentHex(troop.Position, troop.Orientation + direction);
             Troop encounter = map.Get(targetPosition);
 
             if (encounter == null || encounter.Player != troop.Player) return;

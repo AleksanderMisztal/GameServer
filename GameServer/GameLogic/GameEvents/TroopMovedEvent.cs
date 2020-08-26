@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using GameServer.GameLogic.Battles;
 using GameServer.GameLogic.Utils;
@@ -26,6 +27,7 @@ namespace GameServer.GameLogic.GameEvents
             packet.Write(position);
             packet.Write(direction);
 
+            Debug.WriteLine("Battle count: " + battleResults.Count);
             packet.Write(battleResults.Count);
             foreach (BattleResult result in battleResults)
                 packet.Write(result);

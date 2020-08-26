@@ -33,10 +33,7 @@ namespace GameServer.Networking
                 this.socket = socket;
                 isConnected = true;
                 await ServerSend.Welcome(id);
-                while (isConnected)
-                {
-                    await BeginReceive();
-                }
+                while (isConnected) await BeginReceive();
             }
 
             private async Task<byte[]> Receive()
@@ -82,16 +79,12 @@ namespace GameServer.Networking
                     return;
                 }
                 
-                if (data == null)
-                {
-                    return;
-                }
+                if (data == null) return;
 
                 ThreadManager.ExecuteOnMainThread(async () =>
                 {
                     using Packet packet = new Packet(data);
                     int packetType = packet.ReadInt();
-                    Console.WriteLine($"Received a packet of type {packetType}");
                     try
                     {
                         await Server.PacketHandlers[packetType](id, packet);

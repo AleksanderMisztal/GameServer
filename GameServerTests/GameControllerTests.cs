@@ -31,7 +31,7 @@ namespace GameServerTests
             return events;
         }
 
-        private void LogEvents(List<IGameEvent> events)
+        private void LogEvents(IEnumerable<IGameEvent> events)
         {
             foreach (IGameEvent ev in events) Trace.WriteLine(ev.GetString());
             Trace.WriteLine("");
@@ -82,7 +82,7 @@ namespace GameServerTests
         }
 
         [TestMethod]
-        public void Should_ControllTroopWithAI_When_ExitsBoard()
+        public void Should_ControlTroopWithAI_When_ExitsBoard()
         {
             Waves waves = new WavesBuilder()
                 .Add(1, 4, 3, PlayerSide.Blue)
@@ -112,6 +112,12 @@ namespace GameServerTests
             List<IGameEvent> events = Move(PlayerSide.Blue, 0, 3, Forward);
 
             Assert.AreEqual(events.Count, 1);
+        }
+
+        [TestMethod]
+        public void Should_NotThrowIllegalMove_When_MovesAreLegal()
+        {
+            
         }
     }
 }
