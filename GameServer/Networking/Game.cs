@@ -24,7 +24,7 @@ namespace GameServer.Networking
             this.waves = waves;
         }
 
-        public List<IGameEvent> MakeMove(int client, Vector2Int position, int direction)
+        public List<IGameEvent> MakeMove(int client, VectorTwo position, int direction)
         {
             PlayerSide player = GetColor(client);
             List<IGameEvent> events = controller.ProcessMove(player, position, direction);

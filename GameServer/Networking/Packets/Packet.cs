@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using GameServer.GameLogic;
 using GameServer.GameLogic.Battles;
+using GameServer.GameLogic.Troops;
 using GameServer.GameLogic.Utils;
 
 namespace GameServer.Networking.Packets
@@ -68,7 +69,7 @@ namespace GameServer.Networking.Packets
             buffer.AddRange(Encoding.ASCII.GetBytes(value));
         }
 
-        public void Write(Vector2Int value)
+        public void Write(VectorTwo value)
         {
             Write(value.X);
             Write(value.Y);
@@ -130,12 +131,12 @@ namespace GameServer.Networking.Packets
             }
         }
 
-        public Vector2Int ReadVector2Int()
+        public VectorTwo ReadVector2Int()
         {
             int x = ReadInt();
             int y = ReadInt();
 
-            return new Vector2Int(x, y);
+            return new VectorTwo(x, y);
         }
 
         #endregion

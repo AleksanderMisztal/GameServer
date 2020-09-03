@@ -10,11 +10,11 @@ namespace GameServer.GameLogic.GameEvents
 {
     public class TroopMovedEvent : IGameEvent
     {
-        private readonly Vector2Int position;
+        private readonly VectorTwo position;
         private readonly int direction;
         private readonly List<BattleResult> battleResults;
 
-        public TroopMovedEvent(Vector2Int position, int direction, List<BattleResult> battleResults)
+        public TroopMovedEvent(VectorTwo position, int direction, List<BattleResult> battleResults)
         {
             this.position = position;
             this.direction = direction;

@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using GameServer.GameLogic.Troops;
 using GameServer.GameLogic.Utils;
 
 namespace GameServer.GameLogic
 {
     public class TroopMap
     {
-        private readonly Dictionary<Vector2Int, Troop> map = new Dictionary<Vector2Int, Troop>();
+        private readonly Dictionary<VectorTwo, Troop> map = new Dictionary<VectorTwo, Troop>();
 
         private readonly HashSet<Troop> redTroops = new HashSet<Troop>();
         private readonly HashSet<Troop> blueTroops = new HashSet<Troop>();
@@ -18,12 +19,10 @@ namespace GameServer.GameLogic
             this.board = board;
         }
 
-        public void AdjustPosition(Troop troop)
+        public void AdjustPosition(Troop troop, VectorTwo startingPosition)
         {
-            map.Remove(troop.StartingPosition);
+            map.Remove(startingPosition);
             map.Add(troop.Position, troop);
-
-            troop.StartingPosition = troop.Position;
         }
 
         public HashSet<Troop> GetTroops(PlayerSide player)
@@ -31,7 +30,7 @@ namespace GameServer.GameLogic
             return player == PlayerSide.Red ? redTroops : blueTroops;
         }
 
-        public Troop Get(Vector2Int position)
+        public Troop Get(VectorTwo position)
         {
             try
             {
@@ -43,25 +42,25 @@ namespace GameServer.GameLogic
             }
         }
 
-        public void Remove(Troop troop)
+        public void Remove(Troop troop, VectorTwo startingPosition)
         {
-            map.Remove(troop.StartingPosition);
+            map.Remove(startingPosition);
             GetTroops(troop.Player).Remove(troop);
         }
 
         // TODO: Don't return cells outside the board
-        private Vector2Int GetEmptyCell(Vector2Int seedPosition)
+        private VectorTwo GetEmptyCell(VectorTwo seedPosition)
         {
             if (Get(seedPosition) == null) return seedPosition;
 
-            Queue<Vector2Int> q = new Queue<Vector2Int>();
+            Queue<VectorTwo> q = new Queue<VectorTwo>();
             q.Enqueue(seedPosition);
             while (q.Count > 0)
             {
-                Vector2Int position = q.Dequeue();
+                VectorTwo position = q.Dequeue();
                 if (Get(position) == null) return position;
-                Vector2Int[] neighbours = Hex.GetNeighbours(seedPosition);
-                foreach (Vector2Int neigh in neighbours)
+                VectorTwo[] neighbours = Hex.GetNeighbours(seedPosition);
+                foreach (VectorTwo neigh in neighbours)
                     if (board.IsInside(neigh))
                         q.Enqueue(neigh);
             }

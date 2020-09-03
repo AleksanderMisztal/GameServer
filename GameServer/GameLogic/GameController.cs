@@ -3,6 +3,7 @@ using System.Linq;
 using System.Collections.Generic;
 using GameServer.GameLogic.Battles;
 using GameServer.GameLogic.GameEvents;
+using GameServer.GameLogic.Troops;
 using GameServer.GameLogic.Utils;
 
 namespace GameServer.GameLogic
@@ -47,9 +48,7 @@ namespace GameServer.GameLogic
         public NewRoundEvent InitializeAndReturnEvent()
         {
             if (roundNumber == 0)
-            {
-                return (NewRoundEvent)ToggleActivePlayerAndReturnEvents()[0];
-            }
+                return (NewRoundEvent) ToggleActivePlayerAndReturnEvents()[0];
             throw new Exception("This game controller has already been initialized");
         }
 
@@ -94,7 +93,7 @@ namespace GameServer.GameLogic
         }
 
 
-        public List<IGameEvent> ProcessMove(PlayerSide player, Vector2Int position, int direction)
+        public List<IGameEvent> ProcessMove(PlayerSide player, VectorTwo position, int direction)
         {
             List<IGameEvent> events = new List<IGameEvent>();
 
@@ -137,34 +136,35 @@ namespace GameServer.GameLogic
 
         private bool GameHasEnded()
         {
-            bool redLost = troopMap.GetTroops(PlayerSide.Red).Count == 0 && waves.maxRedWave <= roundNumber;
-            bool blueLost = troopMap.GetTroops(PlayerSide.Blue).Count == 0 && waves.maxBlueWave <= roundNumber;
+            bool redLost = troopMap.GetTroops(PlayerSide.Red).Count == 0 && waves.MaxRedWave <= roundNumber;
+            bool blueLost = troopMap.GetTroops(PlayerSide.Blue).Count == 0 && waves.MaxBlueWave <= roundNumber;
 
             return redLost || blueLost;
         }
 
-        private TroopMovedEvent MoveTroop(Vector2Int position, int direction)
+        private TroopMovedEvent MoveTroop(VectorTwo position, int direction)
         {
             movePointsLeft--;
 
             Troop troop = troopMap.Get(position);
+            VectorTwo startingPosition = troop.Position;
             troop.MoveInDirection(direction);
 
             List<BattleResult> battleResults = new List<BattleResult>();
             Troop encounter = troopMap.Get(troop.Position);
             if (encounter == null)
             {
-                troopMap.AdjustPosition(troop);
+                troopMap.AdjustPosition(troop, startingPosition);
                 return new TroopMovedEvent(position, direction, battleResults);
             }
 
             BattleResult result = BattleResult.FriendlyCollision;
             if (encounter.Player != troop.Player)
-                result = battleResolver.GetFightResult(troop, encounter);
+                result = battleResolver.GetFightResult(encounter, startingPosition);
 
             battleResults.Add(result);
-            if (result.AttackerDamaged) ApplyDamage(troop);
-            if (result.DefenderDamaged) ApplyDamage(encounter);
+            if (result.AttackerDamaged) ApplyDamage(troop, startingPosition);
+            if (result.DefenderDamaged) ApplyDamage(encounter, encounter.Position);
 
             troop.FlyOverOtherTroop();
             
@@ -172,19 +172,19 @@ namespace GameServer.GameLogic
             {
                 result = battleResolver.GetCollisionResult();
                 battleResults.Add(result);
-                if (result.AttackerDamaged) ApplyDamage(troop);
-                if (result.DefenderDamaged) ApplyDamage(encounter);
+                if (result.AttackerDamaged) ApplyDamage(troop, startingPosition);
+                if (result.DefenderDamaged) ApplyDamage(encounter, encounter.Position);
 
                 troop.FlyOverOtherTroop();
             }
 
             if (troop.Health > 0)
-                troopMap.AdjustPosition(troop);
+                troopMap.AdjustPosition(troop, startingPosition);
 
             return new TroopMovedEvent(position, direction, battleResults);
         }
 
-        private void ApplyDamage(Troop troop)
+        private void ApplyDamage(Troop troop, VectorTwo startingPosition)
         {
             PlayerSide opponent = troop.Player.Opponent();
             score.Increment(opponent);
@@ -194,12 +194,12 @@ namespace GameServer.GameLogic
 
             troop.ApplyDamage();
             if (troop.Health <= 0)
-                DestroyTroop(troop);
+                DestroyTroop(troop, startingPosition);
         }
 
-        private void DestroyTroop(Troop troop)
+        private void DestroyTroop(Troop troop, VectorTwo startingPosition)
         {
-            troopMap.Remove(troop);
+            troopMap.Remove(troop, startingPosition);
             if (troop.Player == activePlayer)
                 movePointsLeft -= troop.MovePoints;
         }

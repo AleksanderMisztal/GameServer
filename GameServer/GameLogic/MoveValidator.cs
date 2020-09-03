@@ -1,4 +1,5 @@
 ﻿using System;
+using GameServer.GameLogic.Troops;
 using GameServer.GameLogic.Utils;
 
 namespace GameServer.GameLogic
@@ -23,7 +24,7 @@ namespace GameServer.GameLogic
             activePlayer = activePlayer.Opponent();
         }
 
-        public bool IsLegalMove(PlayerSide player, Vector2Int position, int direction)
+        public bool IsLegalMove(PlayerSide player, VectorTwo position, int direction)
         {
             try
             {
@@ -59,7 +60,7 @@ namespace GameServer.GameLogic
                 throw new IllegalMoveException("Attempting to make a move in opponent's turn!");
         }
 
-        private void PositionContainsTroop(Vector2Int position)
+        private void PositionContainsTroop(VectorTwo position)
         {
             if (map.Get(position) == null)
                 throw new IllegalMoveException("No troop at the specified hex!");
@@ -79,19 +80,19 @@ namespace GameServer.GameLogic
 
         private void NotEnteringFriendOrBlocked(Troop troop, int direction)
         {
-            Vector2Int targetPosition = Hex.GetAdjacentHex(troop.Position, troop.Orientation + direction);
+            VectorTwo targetPosition = Hex.GetAdjacentHex(troop.Position, troop.Orientation + direction);
             Troop encounter = map.Get(targetPosition);
 
             if (encounter == null || encounter.Player != troop.Player) return;
 
             // Tries to enter a friend so throw if has some other legal move
-            foreach (Vector2Int cell in troop.ControlZone)
+            foreach (VectorTwo cell in troop.ControlZone)
             {
                 ThrowIfNotBlocked(troop, cell);
             }
         }
 
-        private void ThrowIfNotBlocked(Troop troop, Vector2Int cell)
+        private void ThrowIfNotBlocked(Troop troop, VectorTwo cell)
         {
             if (board.IsOutside(cell)) return;
 

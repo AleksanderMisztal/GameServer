@@ -1,4 +1,5 @@
 ﻿using GameServer.GameLogic;
+using GameServer.GameLogic.Troops;
 using GameServer.GameLogic.Utils;
 using GameServer.GameLogic.Waves;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -49,7 +50,7 @@ namespace GameServerTests
 
         private Troop GetTroop(int x, int y)
         {
-            return troopMap.Get(new Vector2Int(x, y));
+            return troopMap.Get(new VectorTwo(x, y));
         }
 
         [TestMethod]

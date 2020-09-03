@@ -7,22 +7,22 @@ namespace GameServer.GameLogic
         public readonly int xMax;
         public readonly int yMax;
 
-        public Vector2Int Center { get; }
+        public VectorTwo Center { get; }
 
         public Board(int xMax, int yMax)
         {
             this.xMax = xMax;
             this.yMax = yMax;
 
-            Center = new Vector2Int(xMax / 2, yMax / 2);
+            Center = new VectorTwo(xMax / 2, yMax / 2);
         }
 
-        public bool IsOutside(Vector2Int p)
+        public bool IsOutside(VectorTwo p)
         {
             return p.X < 0 || p.X > xMax || p.Y < 0 || p.Y > yMax;
         }
 
-        public bool IsInside(Vector2Int p)
+        public bool IsInside(VectorTwo p)
         {
             return !IsOutside(p);
         }

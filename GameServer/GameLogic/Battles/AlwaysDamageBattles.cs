@@ -1,13 +1,16 @@
-﻿namespace GameServer.GameLogic.Battles
+﻿using GameServer.GameLogic.Troops;
+using GameServer.GameLogic.Utils;
+
+namespace GameServer.GameLogic.Battles
 {
     public class AlwaysDamageBattles : IBattleResolver
     {
-        public BattleResult GetCollisionResult()
+        public BattleResult GetFightResult(Troop defender, VectorTwo attackerPosition)
         {
             return new BattleResult(true, true);
         }
 
-        public BattleResult GetFightResult(Troop attacker, Troop defender)
+        public BattleResult GetCollisionResult()
         {
             return new BattleResult(true, true);
         }

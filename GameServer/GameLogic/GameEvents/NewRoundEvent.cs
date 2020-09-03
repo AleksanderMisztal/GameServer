@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Text;
+using GameServer.GameLogic.Troops;
 using GameServer.Networking;
 using GameServer.Networking.Packets;
 

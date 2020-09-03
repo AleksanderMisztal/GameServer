@@ -15,7 +15,7 @@ namespace GameServer.Networking
 
         public static async Task MoveTroop(int fromClient, Packet packet)
         {
-            Vector2Int position = packet.ReadVector2Int();
+            VectorTwo position = packet.ReadVector2Int();
             int direction = packet.ReadInt();
 
             await GameHandler.MoveTroop(fromClient, position, direction);

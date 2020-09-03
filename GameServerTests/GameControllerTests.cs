@@ -27,7 +27,7 @@ namespace GameServerTests
 
         private List<IGameEvent> Move(PlayerSide player, int x, int y, int direction)
         {
-            List<IGameEvent> events = gc.ProcessMove(player, new Vector2Int(x, y), direction);
+            List<IGameEvent> events = gc.ProcessMove(player, new VectorTwo(x, y), direction);
             return events;
         }
 

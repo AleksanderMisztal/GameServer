@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using GameServer.GameLogic.Troops;
 using GameServer.GameLogic.Utils;
 
 namespace GameServer.GameLogic.Waves
@@ -7,14 +8,14 @@ namespace GameServer.GameLogic.Waves
     {
         private readonly Dictionary<int, List<Troop>> troopsForRound;
 
-        public readonly int maxRedWave;
-        public readonly int maxBlueWave;
+        public readonly int MaxRedWave;
+        public readonly int MaxBlueWave;
 
         public Waves(Dictionary<int, List<Troop>> troopsForRound, int maxRedWave, int maxBlueWave)
         {
             this.troopsForRound = troopsForRound;
-            this.maxRedWave = maxRedWave;
-            this.maxBlueWave = maxBlueWave;
+            this.MaxRedWave = maxRedWave;
+            this.MaxBlueWave = maxBlueWave;
         }
 
         public List<Troop> GetTroops(int round)
@@ -34,13 +35,13 @@ namespace GameServer.GameLogic.Waves
         {
             List<Troop> wave1 = new List<Troop>
             {
-                Troop.Blue(new Vector2Int(2, 3)),
-                Troop.Red(new Vector2Int(6, 2)),
-                Troop.Red(new Vector2Int(6, 3)),
+                TroopFactory.Blue(new VectorTwo(2, 3)),
+                TroopFactory.Red(new VectorTwo(6, 2)),
+                TroopFactory.Red(new VectorTwo(6, 3)),
             };
             List<Troop> wave3 = new List<Troop>
             {
-                Troop.Blue(new Vector2Int(2, 2)),
+                TroopFactory.Blue(new VectorTwo(2, 2)),
             };
 
             Dictionary<int, List<Troop>> troopsForRound = new Dictionary<int, List<Troop>>
@@ -59,42 +60,42 @@ namespace GameServer.GameLogic.Waves
         {
             List<Troop> wave1 = new List<Troop>
             {
-                Troop.Blue(2, 5),
-                Troop.Blue(2, 6),
-                Troop.Blue(2, 7),
-                Troop.Blue(2, 8),
-                Troop.Red(16, 4),
-                Troop.Red(16, 5),
-                Troop.Red(16, 6),
-                Troop.Red(16, 7),
-                Troop.Red(16, 8),
+                TroopFactory.Blue(2, 5),
+                TroopFactory.Blue(2, 6),
+                TroopFactory.Blue(2, 7),
+                TroopFactory.Blue(2, 8),
+                TroopFactory.Red(16, 4),
+                TroopFactory.Red(16, 5),
+                TroopFactory.Red(16, 6),
+                TroopFactory.Red(16, 7),
+                TroopFactory.Red(16, 8),
             };
             List<Troop> wave3 = new List<Troop>
             {
-                Troop.Blue(2, 5),
-                Troop.Blue(2, 6),
-                Troop.Blue(2, 7),
-                Troop.Blue(2, 8),
+                TroopFactory.Blue(2, 5),
+                TroopFactory.Blue(2, 6),
+                TroopFactory.Blue(2, 7),
+                TroopFactory.Blue(2, 8),
             };
             List<Troop> wave4 = new List<Troop>
             {
-                Troop.Red(16, 4),
-                Troop.Red(16, 5),
-                Troop.Red(16, 6),
-                Troop.Red(16, 7),
+                TroopFactory.Red(16, 4),
+                TroopFactory.Red(16, 5),
+                TroopFactory.Red(16, 6),
+                TroopFactory.Red(16, 7),
             };
             List<Troop> wave5 = new List<Troop>
             {
-                Troop.Blue(2, 5),
-                Troop.Blue(2, 6),
-                Troop.Blue(2, 7),
-                Troop.Blue(2, 8),
+                TroopFactory.Blue(2, 5),
+                TroopFactory.Blue(2, 6),
+                TroopFactory.Blue(2, 7),
+                TroopFactory.Blue(2, 8),
             };
             List<Troop> wave6 = new List<Troop>
             {
-                Troop.Red(16, 5),
-                Troop.Red(16, 6),
-                Troop.Red(16, 7),
+                TroopFactory.Red(16, 5),
+                TroopFactory.Red(16, 6),
+                TroopFactory.Red(16, 7),
             };
 
             Dictionary<int, List<Troop>> troopsForRound = new Dictionary<int, List<Troop>>

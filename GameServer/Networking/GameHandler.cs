@@ -42,7 +42,7 @@ namespace GameServer.Networking
             await game.Initialize();
         }
 
-        public static async Task MoveTroop(int client, Vector2Int position, int direction)
+        public static async Task MoveTroop(int client, VectorTwo position, int direction)
         {
             if (direction < -1 || direction > 1)
             {
