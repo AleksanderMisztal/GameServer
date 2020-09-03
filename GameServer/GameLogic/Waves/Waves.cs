@@ -35,8 +35,8 @@ namespace GameServer.GameLogic.Waves
             List<Troop> wave1 = new List<Troop>
             {
                 Troop.Blue(new Vector2Int(2, 3)),
+                Troop.Red(new Vector2Int(6, 2)),
                 Troop.Red(new Vector2Int(6, 3)),
-                Troop.Blue(new Vector2Int(6, 2)),
             };
             List<Troop> wave3 = new List<Troop>
             {

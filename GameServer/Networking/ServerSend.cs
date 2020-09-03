@@ -1,6 +1,7 @@
 ﻿using GameServer.GameLogic;
 using System.Threading.Tasks;
 using GameServer.GameLogic.GameEvents;
+using GameServer.Networking.Packets;
 
 namespace GameServer.Networking
 {

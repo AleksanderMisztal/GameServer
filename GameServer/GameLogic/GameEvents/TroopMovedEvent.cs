@@ -4,6 +4,7 @@ using System.Linq;
 using GameServer.GameLogic.Battles;
 using GameServer.GameLogic.Utils;
 using GameServer.Networking;
+using GameServer.Networking.Packets;
 
 namespace GameServer.GameLogic.GameEvents
 {

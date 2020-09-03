@@ -32,8 +32,8 @@ namespace GameServer.Networking
 
         private static async Task InitializeNewGame(User playingRed, User playingBlue)
         {
-            Waves waves = Waves.Basic();
-            Board board = Board.Standard;
+            Waves waves = Waves.Test();
+            Board board = Board.Test;
             Game game = new Game(playingRed, playingBlue, board, waves);
 
             ClientToGame[playingRed.id] = game;

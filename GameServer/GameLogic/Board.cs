@@ -7,7 +7,7 @@ namespace GameServer.GameLogic
         public readonly int xMax;
         public readonly int yMax;
 
-        public Vector2Int Center { get; private set; }
+        public Vector2Int Center { get; }
 
         public Board(int xMax, int yMax)
         {
@@ -28,6 +28,6 @@ namespace GameServer.GameLogic
         }
 
         public static readonly Board Standard = new Board(20, 12);
-        public static readonly Board Test = new Board(8, 5);
+        public static readonly Board Test = new Board(12, 7);
     }
 }

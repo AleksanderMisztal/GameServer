@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Net.WebSockets;
 using System.Threading.Tasks;
+using GameServer.Networking.Packets;
 
 namespace GameServer.Networking
 {
