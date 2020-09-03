@@ -43,12 +43,6 @@ namespace GameServer.GameLogic
                 message = ex.Message;
                 Console.WriteLine(message);
                 Console.WriteLine($"Pos: {position}, dir: {direction}");
-                Troop troop;
-                if ((troop = map.Get(position)) != null)
-                {
-                    Console.WriteLine($"Target: {Hex.GetAdjacentHex(position, troop.Orientation + direction)}");
-                }
-                map.LogTroops();
                 return false;
             }
         }

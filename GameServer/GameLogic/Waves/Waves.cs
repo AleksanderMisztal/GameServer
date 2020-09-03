@@ -14,8 +14,8 @@ namespace GameServer.GameLogic.Waves
         public Waves(Dictionary<int, List<Troop>> troopsForRound, int maxRedWave, int maxBlueWave)
         {
             this.troopsForRound = troopsForRound;
-            this.MaxRedWave = maxRedWave;
-            this.MaxBlueWave = maxBlueWave;
+            MaxRedWave = maxRedWave;
+            MaxBlueWave = maxBlueWave;
         }
 
         public List<Troop> GetTroops(int round)

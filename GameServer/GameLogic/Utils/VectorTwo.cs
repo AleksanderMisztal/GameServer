@@ -21,7 +21,7 @@
 
         public override bool Equals(object obj)
         {
-            if ((obj == null) || !this.GetType().Equals(obj.GetType())) return false;
+            if (obj == null || GetType() != obj.GetType()) return false;
             VectorTwo v = (VectorTwo)obj;
             return (X == v.X) && (Y == v.Y);
         }
@@ -30,10 +30,6 @@
         {
             return $"({X}, {Y})";
         }
-
-
-        public static VectorTwo operator + (VectorTwo a, VectorTwo b)
-            => new VectorTwo(a.X + b.X, a.Y + b.Y);
 
         public static VectorTwo operator - (VectorTwo a, VectorTwo b)
             => new VectorTwo(a.X - b.X, a.Y - b.Y);

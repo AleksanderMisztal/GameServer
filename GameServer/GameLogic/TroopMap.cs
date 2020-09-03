@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using GameServer.GameLogic.Troops;
 using GameServer.GameLogic.Utils;
 
@@ -48,6 +47,22 @@ namespace GameServer.GameLogic
             GetTroops(troop.Player).Remove(troop);
         }
 
+        public List<Troop> SpawnWave(List<Troop> wave)
+        {
+            foreach (Troop troop in wave)
+            {
+                troop.Position = GetEmptyCell(troop.Position);
+                Add(troop);
+            }
+            return wave;
+        }
+
+        private void Add(Troop troop)
+        {
+            map.Add(troop.Position, troop);
+            GetTroops(troop.Player).Add(troop);
+        }
+
         // TODO: Don't return cells outside the board
         private VectorTwo GetEmptyCell(VectorTwo seedPosition)
         {
@@ -65,30 +80,6 @@ namespace GameServer.GameLogic
                         q.Enqueue(neigh);
             }
             throw new Exception("Couldn't find an empty cell");
-        }
-
-        public List<Troop> SpawnWave(List<Troop> wave)
-        {
-            foreach (Troop troop in wave)
-            {
-                troop.Position = GetEmptyCell(troop.Position);
-                Add(troop);
-            }
-            return wave;
-        }
-
-        private void Add(Troop troop)
-        {
-            map.Add(troop.Position, troop);
-            GetTroops(troop.Player).Add(troop);
-        }
-
-        public void LogTroops()
-        {
-            StringBuilder sb = new StringBuilder();
-            foreach (Troop troop in map.Values) 
-                sb.Append($"{troop.Position}, {troop.Player}\n");
-            Console.WriteLine(sb);
         }
     }
 }
