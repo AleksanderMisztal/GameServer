@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace GameServer.Networking
+namespace GameServer.Utils
 {
     public static class ThreadManager
     {

@@ -1,6 +1,6 @@
 ﻿using System.Linq;
 
-namespace GameServer.Networking
+namespace GameServer.Utils
 {
     public static class Serializer
     {
