@@ -13,19 +13,25 @@ namespace GameServer.Networking
     public class Client
     {
         private readonly int id;
+        private readonly ServerSend sender;
+        private readonly GameHandler gameHandler;
+        private readonly ServerHandle serverHandle;
         private WebSocket socket;
         private bool isConnected;
 
-        public Client(int id)
+        public Client(int id, ServerSend sender, GameHandler gameHandler, ServerHandle serverHandle)
         {
             this.id = id;
+            this.sender = sender;
+            this.gameHandler = gameHandler;
+            this.serverHandle = serverHandle;
         }
 
         public async Task Connect(WebSocket socket)
         {
             this.socket = socket;
             isConnected = true;
-            await ServerSend.Welcome(id);
+            await sender.Welcome(id);
             while (isConnected) await BeginReceive();
         }
 
@@ -68,7 +74,7 @@ namespace GameServer.Networking
             {
                 Console.WriteLine($"Exception occured: {ex}. Disconnecting client {id}.");
                 isConnected = false;
-                await GameHandler.ClientDisconnected(id);
+                await gameHandler.ClientDisconnected(id);
                 return;
             }
             
@@ -77,15 +83,7 @@ namespace GameServer.Networking
             ThreadManager.ExecuteOnMainThread(async () =>
             {
                 using Packet packet = new Packet(data);
-                int packetType = packet.ReadInt();
-                try
-                {
-                    await Server.PacketHandlers[packetType](id, packet);
-                }
-                catch (KeyNotFoundException)
-                {
-                    Console.WriteLine("Unsupported packet type: " + packetType);
-                }
+                serverHandle.Handle(id, packet);
             });
         }
 

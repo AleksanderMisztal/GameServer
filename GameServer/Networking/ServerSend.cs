@@ -6,16 +6,23 @@ using GameServer.Networking.Packets;
 
 namespace GameServer.Networking
 {
-    public static class ServerSend
+    public class ServerSend
     {
-        public static async Task Welcome(int toClient)
+        private readonly Server server;
+
+        public ServerSend(Server server)
+        {
+            this.server = server;
+        }
+
+        public async Task Welcome(int toClient)
         {
             using Packet packet = new Packet((int)ServerPackets.Welcome);
-            await Server.SendPacket(toClient, packet);
+            await server.SendPacket(toClient, packet);
         }
 
         
-        public static async Task GameJoined(int toClient, string opponentName, PlayerSide side, Board board)
+        public async Task GameJoined(int toClient, string opponentName, PlayerSide side, Board board)
         {
             using Packet packet = new Packet((int)ServerPackets.GameJoined);
 
@@ -23,51 +30,51 @@ namespace GameServer.Networking
             packet.Write((int)side);
             packet.Write(board);
 
-            await Server.SendPacket(toClient, packet);
+            await server.SendPacket(toClient, packet);
         }
 
-        public static async Task MessageSent(int toClient, string message)
+        public async Task MessageSent(int toClient, string message)
         {
             using Packet packet = new Packet((int)ServerPackets.MessageSent);
             packet.Write(message);
-            await Server.SendPacket(toClient, packet);
+            await server.SendPacket(toClient, packet);
         }
 
-        public static async Task OpponentDisconnected(int toClient)
+        public async Task OpponentDisconnected(int toClient)
         {
             using Packet packet = new Packet((int)ServerPackets.OpponentDisconnected);
-            await Server.SendPacket(toClient, packet);
+            await server.SendPacket(toClient, packet);
         }
 
         
-        public static async Task TroopsSpawned(int redId, int blueId, TroopsSpawnedEventArgs args)
+        public async Task TroopsSpawned(int redId, int blueId, TroopsSpawnedEventArgs args)
         {
             using Packet packet = new Packet((int)ServerPackets.TroopSpawned);
             packet.Write(args.Troops);
 
-            await Server.SendPacket(redId, packet);
-            await Server.SendPacket(blueId, packet);
+            await server.SendPacket(redId, packet);
+            await server.SendPacket(blueId, packet);
         }
 
-        public static async Task TroopMoved(int redId, int blueId, TroopMovedEventArgs args)
+        public async Task TroopMoved(int redId, int blueId, TroopMovedEventArgs args)
         {
             using Packet packet = new Packet((int)ServerPackets.TroopMoved);
             packet.Write(args.Position);
             packet.Write(args.Direction);
             packet.Write(args.BattleResults);
 
-            await Server.SendPacket(redId, packet);
-            await Server.SendPacket(blueId, packet);
+            await server.SendPacket(redId, packet);
+            await server.SendPacket(blueId, packet);
         }
 
-        public static async Task GameEnded(int redId, int blueId, GameEndedEventArgs args)
+        public async Task GameEnded(int redId, int blueId, GameEndedEventArgs args)
         {
             using Packet packet = new Packet((int)ServerPackets.TroopMoved);
             packet.Write(args.Score.Red);
             packet.Write(args.Score.Blue);
 
-            await Server.SendPacket(redId, packet);
-            await Server.SendPacket(blueId, packet);
+            await server.SendPacket(redId, packet);
+            await server.SendPacket(blueId, packet);
         }
     }
 }

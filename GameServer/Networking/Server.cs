@@ -6,41 +6,45 @@ using GameServer.Networking.Packets;
 
 namespace GameServer.Networking
 {
-    public static class Server
+    public class Server
     {
-        private static int _nextClientId;
-        private static readonly Dictionary<int, Client> Clients = new Dictionary<int, Client>();
+        private readonly ServerSend sender;
+        private readonly GameHandler gameHandler;
+        private readonly ServerHandle serverHandle;
 
-        public delegate Task PacketHandler(int fromClient, Packet packet);
-        public static readonly Dictionary<int, PacketHandler> PacketHandlers= new Dictionary<int, PacketHandler>
+        public Server()
         {
-            {(int) ClientPackets.JoinGame, ServerHandle.JoinGame },
-            {(int) ClientPackets.MoveTroop, ServerHandle.MoveTroop },
-            {(int) ClientPackets.SendMessage, ServerHandle.SendMessage },
-        };
+            sender = new ServerSend(this);
+            gameHandler = new GameHandler(sender);
+            serverHandle = new ServerHandle(gameHandler);
+        }
 
-        public static async Task ConnectNewClient(WebSocket socket)
+        private int nextClientId;
+        private readonly Dictionary<int, Client> clients = new Dictionary<int, Client>();
+
+
+        public async Task ConnectNewClient(WebSocket socket)
         {
             Console.WriteLine("Connecting a new client");
 
-            Client client = new Client(_nextClientId);
+            Client client = new Client(nextClientId, sender, gameHandler, serverHandle);
 
-            Clients.Add(_nextClientId, client);
-            _nextClientId++;
+            clients.Add(nextClientId, client);
+            nextClientId++;
 
             await client.Connect(socket);
         }
 
-        public static async Task SendPacket(int toClient, Packet packet)
+        public async Task SendPacket(int toClient, Packet packet)
         {
             try
             {
-                await Clients[toClient].SendData(packet);
+                await clients[toClient].SendData(packet);
             }
             catch (WebSocketException ex)
             {
                 Console.WriteLine("Exception thrown by server while sending data: " + ex);
-                await GameHandler.ClientDisconnected(toClient);
+                await gameHandler.ClientDisconnected(toClient);
             }
         }
     }

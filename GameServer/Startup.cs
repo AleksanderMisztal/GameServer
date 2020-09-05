@@ -22,6 +22,8 @@ namespace GameServer
             .AllowAnyHeader());
 
             app.UseWebSockets();
+            
+            Server server = new Server();
 
             app.Use(async (context, next) =>
             {
@@ -29,7 +31,7 @@ namespace GameServer
                 {
                     WebSocket socket = await context.WebSockets.AcceptWebSocketAsync();
 
-                    await Server.ConnectNewClient(socket);
+                    await server.ConnectNewClient(socket);
                 }
                 else
                 {
