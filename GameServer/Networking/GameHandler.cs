@@ -1,6 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
-using System;
 using GameJudge;
 using GameJudge.Areas;
 using GameJudge.Utils;
@@ -34,18 +34,29 @@ namespace GameServer.Networking
         {
             Waves waves = Waves.Test();
             Board board = Board.Test;
-            GameController gc = new GameController(waves, board);
+            GameController gc = CreateGameController(playingRed, playingBlue, waves, board);
+            await InitializeGame(playingRed, playingBlue, gc, board);
+            gc.BeginGame();
+        }
+
+        private static async Task InitializeGame(User playingRed, User playingBlue, GameController gc, Board board)
+        {
             Game game = new Game(playingRed, playingBlue, gc);
 
             ClientToGame[playingRed.id] = game;
             ClientToGame[playingBlue.id] = game;
 
-            gc.TroopsSpawned += async (sender, args) => await ServerSend.TroopsSpawned(playingRed.id, playingBlue.id, args);
-
             await ServerSend.GameJoined(playingRed.id, playingBlue.name, PlayerSide.Red, board);
             await ServerSend.GameJoined(playingBlue.id, playingRed.name, PlayerSide.Blue, board);
-            
-            gc.Initialize();
+        }
+
+        private static GameController CreateGameController(User playingRed, User playingBlue, Waves waves, Board board)
+        {
+            GameController gc = new GameController(waves, board);
+            gc.TroopsSpawned += async (sender, args) => await ServerSend.TroopsSpawned(playingRed.id, playingBlue.id, args);
+            gc.TroopMoved += async (sender, args) => await ServerSend.TroopMoved(playingRed.id, playingBlue.id, args);
+            gc.GameEnded += async (sender, args) => await ServerSend.GameEnded(playingRed.id, playingBlue.id, args);
+            return gc;
         }
 
         public static void MoveTroop(int client, VectorTwo position, int direction)

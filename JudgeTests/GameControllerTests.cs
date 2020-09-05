@@ -25,7 +25,7 @@ namespace JudgeTests
             gc.TroopsSpawned += (sender, args) => Debug.WriteLine(args);
             gc.GameEnded += (sender, args) => Debug.WriteLine(args);
             
-            gc.Initialize();
+            gc.BeginGame();
         }
     }
 }

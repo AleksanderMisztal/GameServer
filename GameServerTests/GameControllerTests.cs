@@ -20,7 +20,7 @@ namespace GameServerTests
             Board board = new Board(xMax, yMax);
 
             gc = new GameController(battles, board, waves);
-            gc.Initialize();
+            gc.BeginGame();
         }
 
         private void Move(PlayerSide player, int x, int y, int direction)

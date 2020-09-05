@@ -14,6 +14,7 @@ namespace GameServer.Networking
             await Server.SendPacket(toClient, packet);
         }
 
+        
         public static async Task GameJoined(int toClient, string opponentName, PlayerSide side, Board board)
         {
             using Packet packet = new Packet((int)ServerPackets.GameJoined);
@@ -38,10 +39,32 @@ namespace GameServer.Networking
             await Server.SendPacket(toClient, packet);
         }
 
+        
         public static async Task TroopsSpawned(int redId, int blueId, TroopsSpawnedEventArgs args)
         {
             using Packet packet = new Packet((int)ServerPackets.TroopSpawned);
-            packet.Write(args);
+            packet.Write(args.Troops);
+
+            await Server.SendPacket(redId, packet);
+            await Server.SendPacket(blueId, packet);
+        }
+
+        public static async Task TroopMoved(int redId, int blueId, TroopMovedEventArgs args)
+        {
+            using Packet packet = new Packet((int)ServerPackets.TroopMoved);
+            packet.Write(args.Position);
+            packet.Write(args.Direction);
+            packet.Write(args.BattleResults);
+
+            await Server.SendPacket(redId, packet);
+            await Server.SendPacket(blueId, packet);
+        }
+
+        public static async Task GameEnded(int redId, int blueId, GameEndedEventArgs args)
+        {
+            using Packet packet = new Packet((int)ServerPackets.TroopMoved);
+            packet.Write(args.Score.Red);
+            packet.Write(args.Score.Blue);
 
             await Server.SendPacket(redId, packet);
             await Server.SendPacket(blueId, packet);

@@ -59,7 +59,7 @@ namespace GameJudge
         }
 
         
-        public void Initialize()
+        public void BeginGame()
         {
             if (roundNumber != 0) throw new Exception("This game controller has already been initialized");
             ToggleActivePlayer();

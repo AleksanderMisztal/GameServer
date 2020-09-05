@@ -5,6 +5,7 @@ using GameJudge.Areas;
 using GameJudge.Battles;
 using GameJudge.Troops;
 using GameJudge.Utils;
+using Microsoft.VisualBasic;
 
 namespace GameServer.Networking.Packets
 {
@@ -82,10 +83,22 @@ namespace GameServer.Networking.Packets
             Write(value.Position);
         }
 
+        public void Write(ICollection<Troop> troops)
+        {
+            Write(troops.Count);
+            foreach (Troop troop in troops) Write(troop);
+        }
+
         public void Write(BattleResult value)
         {
             Write(value.AttackerDamaged);
             Write(value.DefenderDamaged);
+        }
+
+        public void Write(ICollection<BattleResult> battleResults)
+        {
+            Write(battleResults.Count);
+            foreach (BattleResult battleResult in battleResults) Write(battleResult);
         }
 
         public void Write(Board value)
