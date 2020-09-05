@@ -1,10 +1,9 @@
 ﻿using System.Collections.Generic;
-using GameServer.GameLogic;
 using System.Threading.Tasks;
 using System;
-using GameServer.GameLogic.GameEvents;
-using GameServer.GameLogic.Utils;
-using GameServer.GameLogic.Waves;
+using GameJudge.Areas;
+using GameJudge.Utils;
+using GameJudge.WavesN;
 
 namespace GameServer.Networking
 {
@@ -42,7 +41,7 @@ namespace GameServer.Networking
             await game.Initialize();
         }
 
-        public static async Task MoveTroop(int client, VectorTwo position, int direction)
+        public static void MoveTroop(int client, VectorTwo position, int direction)
         {
             if (direction < -1 || direction > 1)
             {
@@ -50,12 +49,7 @@ namespace GameServer.Networking
                 return;
             }
             Game game = ClientToGame[client];
-            List<IGameEvent> events = game.MakeMove(client, position, direction);
-            foreach (IGameEvent ev in events)
-            {
-                await ServerSend.GameEvent(game.blueUser.id, ev);
-                await ServerSend.GameEvent(game.redUser.id, ev);
-            }
+            game.MakeMove(client, position, direction);
         }
 
         public static async Task SendMessage(int client, string message)
@@ -80,7 +74,7 @@ namespace GameServer.Networking
         private static int GetOpponent(int client)
         {
             Game game = ClientToGame[client];
-            int opponentId = game.blueUser.id ^ game.redUser.id ^ client;
+            int opponentId = game.BlueUser.id ^ game.RedUser.id ^ client;
             return opponentId;
         }
     }

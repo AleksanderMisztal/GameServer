@@ -1,7 +1,8 @@
-﻿using GameServer.GameLogic;
-using GameServer.GameLogic.Troops;
-using GameServer.GameLogic.Utils;
-using GameServer.GameLogic.Waves;
+﻿using GameJudge;
+using GameJudge.Areas;
+using GameJudge.Troops;
+using GameJudge.Utils;
+using GameJudge.WavesN;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace GameServerTests

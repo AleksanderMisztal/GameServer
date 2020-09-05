@@ -1,5 +1,5 @@
 ﻿using System.Threading.Tasks;
-using GameServer.GameLogic.Utils;
+using GameJudge.Utils;
 using GameServer.Networking.Packets;
 
 namespace GameServer.Networking
@@ -13,12 +13,13 @@ namespace GameServer.Networking
             await GameHandler.SendToGame(newUser);
         }
 
-        public static async Task MoveTroop(int fromClient, Packet packet)
+        public static Task MoveTroop(int fromClient, Packet packet)
         {
             VectorTwo position = packet.ReadVector2Int();
             int direction = packet.ReadInt();
 
-            await GameHandler.MoveTroop(fromClient, position, direction);
+            GameHandler.MoveTroop(fromClient, position, direction);
+            return Task.CompletedTask;
         }
 
         public static async Task SendMessage(int fromClient, Packet packet)

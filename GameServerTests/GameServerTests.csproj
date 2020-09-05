@@ -4,6 +4,8 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
 
     <IsPackable>false</IsPackable>
+
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -15,6 +17,12 @@
 
   <ItemGroup>
     <ProjectReference Include="..\GameServer\GameServer.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="GameJudge, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\GameJudge.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
 </Project>

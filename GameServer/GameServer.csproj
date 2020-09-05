@@ -2,6 +2,13 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Reference Include="GameJudge, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\GameJudge.dll</HintPath>
+    </Reference>
+  </ItemGroup>
 
 </Project>

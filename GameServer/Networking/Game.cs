@@ -1,16 +1,16 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using GameServer.GameLogic;
-using GameServer.GameLogic.GameEvents;
-using GameServer.GameLogic.Utils;
-using GameServer.GameLogic.Waves;
+using GameJudge;
+using GameJudge.Areas;
+using GameJudge.Utils;
+using GameJudge.WavesN;
 
 namespace GameServer.Networking
 {
     public class Game
     {
-        public readonly User redUser;
-        public readonly User blueUser;
+        public readonly User RedUser;
+        public readonly User BlueUser;
         private readonly Board board;
         private readonly Waves waves;
 
@@ -18,23 +18,22 @@ namespace GameServer.Networking
 
         public Game(User redUser, User blueUser, Board board, Waves waves)
         {
-            this.redUser = redUser;
-            this.blueUser = blueUser;
+            this.RedUser = redUser;
+            this.BlueUser = blueUser;
             this.board = board;
             this.waves = waves;
         }
 
-        public List<IGameEvent> MakeMove(int client, VectorTwo position, int direction)
+        public void MakeMove(int client, VectorTwo position, int direction)
         {
             PlayerSide player = GetColor(client);
-            List<IGameEvent> events = controller.ProcessMove(player, position, direction);
-            return events;
+            controller.ProcessMove(player, position, direction);
         }
 
         private PlayerSide GetColor(int client)
         {
-            if (client == redUser.id) return PlayerSide.Red;
-            if (client == blueUser.id) return PlayerSide.Blue;
+            if (client == RedUser.id) return PlayerSide.Red;
+            if (client == BlueUser.id) return PlayerSide.Blue;
 
             throw new KeyNotFoundException();
         }
@@ -44,13 +43,10 @@ namespace GameServer.Networking
             if (controller != null) return;
 
             controller = new GameController(waves, board);
-            await ServerSend.GameJoined(redUser.id, blueUser.name, PlayerSide.Red, board);
-            await ServerSend.GameJoined(blueUser.id, redUser.name, PlayerSide.Blue, board);
+            await ServerSend.GameJoined(RedUser.id, BlueUser.name, PlayerSide.Red, board);
+            await ServerSend.GameJoined(BlueUser.id, RedUser.name, PlayerSide.Blue, board);
 
-            // TODO: Construct one event and use for both clients (in other uses too)
-            NewRoundEvent ev = controller.InitializeAndReturnEvent();
-            await ServerSend.GameEvent(redUser.id, ev);
-            await ServerSend.GameEvent(blueUser.id, ev);
+            controller.Initialize();
         }
     }
 }

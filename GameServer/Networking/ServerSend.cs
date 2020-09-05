@@ -1,6 +1,6 @@
-﻿using GameServer.GameLogic;
-using System.Threading.Tasks;
-using GameServer.GameLogic.GameEvents;
+﻿using System.Threading.Tasks;
+using GameJudge;
+using GameJudge.Areas;
 using GameServer.Networking.Packets;
 
 namespace GameServer.Networking
@@ -21,12 +21,6 @@ namespace GameServer.Networking
             packet.Write((int)side);
             packet.Write(board);
 
-            await Server.SendPacket(toClient, packet);
-        }
-
-        public static async Task GameEvent(int toClient, IGameEvent gameEvent)
-        {
-            using Packet packet = gameEvent.GetPacket();
             await Server.SendPacket(toClient, packet);
         }
 

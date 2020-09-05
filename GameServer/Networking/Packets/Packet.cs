@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using GameServer.GameLogic;
-using GameServer.GameLogic.Battles;
-using GameServer.GameLogic.Troops;
-using GameServer.GameLogic.Utils;
+using GameJudge.Areas;
+using GameJudge.Battles;
+using GameJudge.Troops;
+using GameJudge.Utils;
 
 namespace GameServer.Networking.Packets
 {
@@ -18,7 +18,6 @@ namespace GameServer.Networking.Packets
         {
             buffer = new List<byte>();
             readPos = 0;
-
             Write(id);
         }
 
@@ -26,7 +25,6 @@ namespace GameServer.Networking.Packets
         {
             buffer = new List<byte>();
             readPos = 0;
-
             SetBytes(data);
         }
 
@@ -92,8 +90,8 @@ namespace GameServer.Networking.Packets
 
         public void Write(Board value)
         {
-            Write(value.xMax);
-            Write(value.yMax);
+            Write(value.XMax);
+            Write(value.YMax);
         }
         #endregion
 
@@ -146,6 +144,7 @@ namespace GameServer.Networking.Packets
         public void Dispose()
         {
             if (disposed) return;
+            
             buffer = null;
             readableBuffer = null;
             readPos = 0;
