@@ -11,97 +11,87 @@ namespace GameServer.Networking
 {
     public class Client
     {
-        public readonly WsClient wsClient;
+        private readonly int id;
+        private WebSocket socket;
+        private bool isConnected;
 
-        public Client(int clientId)
+        public Client(int id)
         {
-            wsClient = new WsClient(clientId);
+            this.id = id;
         }
 
-        public class WsClient
+        public async Task Connect(WebSocket socket)
         {
-            private readonly int id;
-            private WebSocket socket;
-            private bool isConnected;
+            this.socket = socket;
+            isConnected = true;
+            await ServerSend.Welcome(id);
+            while (isConnected) await BeginReceive();
+        }
 
-            public WsClient(int id)
+        private async Task<byte[]> Receive()
+        {
+            ArraySegment<byte> buffer = new ArraySegment<byte>(new byte[4 * 1024]);
+            MemoryStream memoryStream = new MemoryStream();
+            WebSocketReceiveResult result;
+
+            do
             {
-                this.id = id;
+                result = await socket.ReceiveAsync(buffer, CancellationToken.None);
+                memoryStream.Write(buffer.Array, buffer.Offset, result.Count);
+            } while (!result.EndOfMessage);
+
+            memoryStream.Seek(0, SeekOrigin.Begin);
+
+            if (result.MessageType == WebSocketMessageType.Close) return null;
+            using StreamReader reader = new StreamReader(memoryStream, Encoding.UTF8);
+            string bytes = reader.ReadToEnd();
+            try
+            {
+                return Serializer.Deserialize(bytes);
             }
-
-            public async Task Connect(WebSocket socket)
+            catch
             {
-                this.socket = socket;
-                isConnected = true;
-                await ServerSend.Welcome(id);
-                while (isConnected) await BeginReceive();
+                Console.WriteLine("Couldn't convert to bytes");
             }
+            return null;
+        }
 
-            private async Task<byte[]> Receive()
+        private async Task BeginReceive()
+        {
+            byte[] data;
+            try
             {
-                ArraySegment<byte> buffer = new ArraySegment<byte>(new byte[4 * 1024]);
-                MemoryStream memoryStream = new MemoryStream();
-                WebSocketReceiveResult result;
+                data = await Receive();
+            }
+            catch (WebSocketException ex)
+            {
+                Console.WriteLine($"Exception occured: {ex}. Disconnecting client {id}.");
+                isConnected = false;
+                await GameHandler.ClientDisconnected(id);
+                return;
+            }
+            
+            if (data == null) return;
 
-                do
-                {
-                    result = await socket.ReceiveAsync(buffer, CancellationToken.None);
-                    memoryStream.Write(buffer.Array, buffer.Offset, result.Count);
-                } while (!result.EndOfMessage);
-
-                memoryStream.Seek(0, SeekOrigin.Begin);
-
-                if (result.MessageType == WebSocketMessageType.Close) return null;
-                using StreamReader reader = new StreamReader(memoryStream, Encoding.UTF8);
-                string bytes = reader.ReadToEnd();
+            ThreadManager.ExecuteOnMainThread(async () =>
+            {
+                using Packet packet = new Packet(data);
+                int packetType = packet.ReadInt();
                 try
                 {
-                    return Serializer.Deserialize(bytes);
+                    await Server.PacketHandlers[packetType](id, packet);
                 }
-                catch
+                catch (KeyNotFoundException)
                 {
-                    Console.WriteLine("Couldn't convert to bytes");
+                    Console.WriteLine("Unsupported packet type: " + packetType);
                 }
-                return null;
-            }
+            });
+        }
 
-            private async Task BeginReceive()
-            {
-                byte[] data;
-                try
-                {
-                    data = await Receive();
-                }
-                catch (WebSocketException ex)
-                {
-                    Console.WriteLine($"Exception occured: {ex}. Disconnecting client {id}.");
-                    isConnected = false;
-                    await GameHandler.ClientDisconnected(id);
-                    return;
-                }
-                
-                if (data == null) return;
-
-                ThreadManager.ExecuteOnMainThread(async () =>
-                {
-                    using Packet packet = new Packet(data);
-                    int packetType = packet.ReadInt();
-                    try
-                    {
-                        await Server.PacketHandlers[packetType](id, packet);
-                    }
-                    catch (KeyNotFoundException)
-                    {
-                        Console.WriteLine("Unsupported packet type: " + packetType);
-                    }
-                });
-            }
-
-            public async Task SendData(Packet packet)
-            {
-                ArraySegment<byte> buffer = new ArraySegment<byte>(Encoding.UTF8.GetBytes(Serializer.Serialize(packet.ToArray())));
-                await socket.SendAsync(buffer, WebSocketMessageType.Binary, true, CancellationToken.None);
-            }
+        public async Task SendData(Packet packet)
+        {
+            ArraySegment<byte> buffer = new ArraySegment<byte>(Encoding.UTF8.GetBytes(Serializer.Serialize(packet.ToArray())));
+            await socket.SendAsync(buffer, WebSocketMessageType.Binary, true, CancellationToken.None);
         }
     }
 }

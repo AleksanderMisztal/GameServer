@@ -28,14 +28,14 @@ namespace GameServer.Networking
             Clients.Add(_nextClientId, client);
             _nextClientId++;
 
-            await client.wsClient.Connect(socket);
+            await client.Connect(socket);
         }
 
         public static async Task SendPacket(int toClient, Packet packet)
         {
             try
             {
-                await Clients[toClient].wsClient.SendData(packet);
+                await Clients[toClient].SendData(packet);
             }
             catch (WebSocketException ex)
             {
