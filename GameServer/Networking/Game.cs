@@ -11,17 +11,13 @@ namespace GameServer.Networking
     {
         public readonly User RedUser;
         public readonly User BlueUser;
-        private readonly Board board;
-        private readonly Waves waves;
+        private readonly GameController controller;
 
-        private GameController controller;
-
-        public Game(User redUser, User blueUser, Board board, Waves waves)
+        public Game(User redUser, User blueUser, GameController controller)
         {
-            this.RedUser = redUser;
-            this.BlueUser = blueUser;
-            this.board = board;
-            this.waves = waves;
+            RedUser = redUser;
+            BlueUser = blueUser;
+            this.controller = controller;
         }
 
         public void MakeMove(int client, VectorTwo position, int direction)
@@ -36,17 +32,6 @@ namespace GameServer.Networking
             if (client == BlueUser.id) return PlayerSide.Blue;
 
             throw new KeyNotFoundException();
-        }
-
-        public async Task Initialize()
-        {
-            if (controller != null) return;
-
-            controller = new GameController(waves, board);
-            await ServerSend.GameJoined(RedUser.id, BlueUser.name, PlayerSide.Red, board);
-            await ServerSend.GameJoined(BlueUser.id, RedUser.name, PlayerSide.Blue, board);
-
-            controller.Initialize();
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System.Threading.Tasks;
 using GameJudge;
 using GameJudge.Areas;
+using GameJudge.GameEvents;
 using GameServer.Networking.Packets;
 
 namespace GameServer.Networking
@@ -35,6 +36,15 @@ namespace GameServer.Networking
         {
             using Packet packet = new Packet((int)ServerPackets.OpponentDisconnected);
             await Server.SendPacket(toClient, packet);
+        }
+
+        public static async Task TroopsSpawned(int redId, int blueId, TroopsSpawnedEventArgs args)
+        {
+            using Packet packet = new Packet((int)ServerPackets.TroopSpawned);
+            packet.Write(args);
+
+            await Server.SendPacket(redId, packet);
+            await Server.SendPacket(blueId, packet);
         }
     }
 }

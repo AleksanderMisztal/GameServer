@@ -7,6 +7,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GameServer", "GameServer\Ga
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameServerTests", "GameServerTests\GameServerTests.csproj", "{6D80A099-5C7D-48EE-A611-A352986E1287}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameJudge", "Judge\GameJudge.csproj", "{D6435E70-2D60-4944-8BE1-E15E5E6501B5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JudgeTests", "JudgeTests\JudgeTests.csproj", "{A6F30144-15CA-4569-804D-C8954028F070}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +25,14 @@ Global
 		{6D80A099-5C7D-48EE-A611-A352986E1287}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6D80A099-5C7D-48EE-A611-A352986E1287}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6D80A099-5C7D-48EE-A611-A352986E1287}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D6435E70-2D60-4944-8BE1-E15E5E6501B5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D6435E70-2D60-4944-8BE1-E15E5E6501B5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D6435E70-2D60-4944-8BE1-E15E5E6501B5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D6435E70-2D60-4944-8BE1-E15E5E6501B5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A6F30144-15CA-4569-804D-C8954028F070}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A6F30144-15CA-4569-804D-C8954028F070}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A6F30144-15CA-4569-804D-C8954028F070}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A6F30144-15CA-4569-804D-C8954028F070}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using System;
+using GameJudge;
 using GameJudge.Areas;
 using GameJudge.Utils;
 using GameJudge.WavesN;
@@ -33,12 +34,18 @@ namespace GameServer.Networking
         {
             Waves waves = Waves.Test();
             Board board = Board.Test;
-            Game game = new Game(playingRed, playingBlue, board, waves);
+            GameController gc = new GameController(waves, board);
+            Game game = new Game(playingRed, playingBlue, gc);
 
             ClientToGame[playingRed.id] = game;
             ClientToGame[playingBlue.id] = game;
 
-            await game.Initialize();
+            gc.TroopsSpawned += async (sender, args) => await ServerSend.TroopsSpawned(playingRed.id, playingBlue.id, args);
+
+            await ServerSend.GameJoined(playingRed.id, playingBlue.name, PlayerSide.Red, board);
+            await ServerSend.GameJoined(playingBlue.id, playingRed.name, PlayerSide.Blue, board);
+            
+            gc.Initialize();
         }
 
         public static void MoveTroop(int client, VectorTwo position, int direction)
